@@ -602,3 +602,64 @@
     </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #050507; color: white; }
+        .glass { background: rgba(20, 20, 25, 0.8); backdrop-filter: blur(10px); }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        function App() {
+            const [selectedAI, setSelectedAI] = React.useState('luna'); // Luna=Math, Sol=Science
+
+            return (
+                <div className="flex h-screen">
+                    {/* Sidebar */}
+                    <div className="w-64 border-r border-white/10 p-4 flex flex-col gap-6">
+                        <img src="2.jpg" alt="Eclipse Logo" className="w-16 h-16" />
+                        <nav className="space-y-4 text-gray-400">
+                            <p>Knowledge Vault</p>
+                            <p>Progress Tracking</p>
+                            <p>Settings</p>
+                        </nav>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="flex-1 flex flex-col">
+                        <header className="h-16 border-b border-white/10 flex items-center justify-between px-8">
+                            <div className="flex gap-4">
+                                <button onClick={() => setSelectedAI('luna')} className={`px-4 py-1 rounded ${selectedAI === 'luna' ? 'bg-purple-600' : 'bg-gray-800'}`}>
+                                    <img src="3.jpg" className="w-6 h-6 inline mr-2" /> Luna (Math)
+                                </button>
+                                <button onClick={() => setSelectedAI('sol')} className={`px-4 py-1 rounded ${selectedAI === 'sol' ? 'bg-yellow-600' : 'bg-gray-800'}`}>
+                                    <img src="4.jpg" className="w-6 h-6 inline mr-2" /> Sol (Science)
+                                </button>
+                            </div>
+                            <button className="bg-white text-black px-4 py-1 rounded-full font-bold">Sign Up / Login</button>
+                        </header>
+
+                        <div className="flex-1 p-8">
+                            <div className="max-w-2xl mx-auto glass p-6 rounded-xl border border-white/10">
+                                <h2 className="text-xl font-bold mb-4">{selectedAI === 'luna' ? 'Luna Math Engine' : 'Sol Science Engine'}</h2>
+                                <textarea className="w-full h-32 bg-transparent border border-gray-600 rounded p-2" placeholder="Ask your question..."></textarea>
+                                <button className="mt-4 w-full bg-indigo-600 py-2 rounded">Submit Request</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
