@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eclipse AI | Learn How To Think</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        eclipse: {
+                            bg: '#050507',
+                            surface: '#121217',
+                            border: '#2A2A35',
+                            accent: '#6366F1',
+                            accentGlow: 'rgba(99, 102, 241, 0.15)',
+                            text: '#E2E8F0',
+                            muted: '#94A3B8'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            background-color: #050507;
+            color: #E2E8F0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2A2A35; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        
+        .glass {
+            background: rgba(18, 18, 23, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .eclipse-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- Icons (Mapping Lucide Icons to functional components for ease) ---
+        const Icon = ({ name, size = 20, className = "" }) => {
+            React.useEffect(() => {
+                lucide.createIcons();
+            });
+            return <i data-lucide={name} width={size} height={size} className={className}></i>;
+        };
+
+        // --- Main App Component ---
+        function App() {
+            const [currentView, setCurrentView] = useState('home');
+
+            return (
+                <div className="min-h-screen flex flex-col relative selection:bg-indigo-500/30">
+                    <div className="eclipse-glow top-[-200px] left-[-200px]"></div>
+                    <div className="eclipse-glow bottom-[-200px] right-[-200px]"></div>
+                    
+                    <Navbar currentView={currentView} setCurrentView={setCurrentView} />
+                    
+                    <main className="flex-grow flex flex-col pt-16">
+                        {currentView === 'home' && <HomeView setCurrentView={setCurrentView} />}
+                        {currentView === 'chat' && <ChatView />}
+                        {currentView === 'courses' && <CoursesView />}
+                        {currentView === 'progress' && <ProgressView />}
+                        {currentView === 'pricing' && <PricingView />}
+                    </main>
+                </div>
+            );
+        }
+
+        // --- Navigation Bar ---
+        function Navbar({ currentView, setCurrentView }) {
+            const navItems = ['Home', 'Chat', 'Courses', 'Practice', 'Progress', 'Pricing'];
+            
+            return (
+                <nav className="fixed top-0 w-full glass z-50 px-6 py-4 flex justify-between items-center">
+                    <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentView('home')}>
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-400 flex items-center justify-center shadow-[0_0_15px_rgba(99,102,241,0.5)]">
+                            <div className="w-6 h-6 rounded-full bg-eclipse-bg"></div>
+                        </div>
+                        <span className="text-xl font-bold tracking-tight text-white">Eclipse AI</span>
+                    </div>
+                    
+                    <div className="hidden md:flex items-center gap-6">
+                        {navItems.map(item => (
+                            <button 
+                                key={item}
+                                onClick={() => setCurrentView(item.toLowerCase())}
+                                className={`text-sm font-medium transition-colors ${currentView === item.toLowerCase() ? 'text-indigo-400' : 'text-eclipse-muted hover:text-white'}`}
+                            >
+                                {item}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <button className="text-sm font-medium text-eclipse-muted hover:text-white transition-colors">Log In</button>
+                        <button className="text-sm font-medium bg-white text-black px-4 py-2 rounded-full hover:bg-gray-200 transition-all">Sign Up</button>
+                    </div>
+                </nav>
+            );
+        }
+
+        // --- Home View ---
+        function HomeView({ setCurrentView }) {
+            return (
+                <div className="flex-grow flex flex-col items-center justify-center px-6 pb-20 text-center mt-20">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm mb-8">
+                            <Icon name="sparkles" size={14} />
+                            <span>Introducing Advanced Reasoning Engine v2.0</span>
+                        </div>
+                        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500">
+                            Learn how to think,<br/>not what to memorize.
+                        </h1>
+                        <p className="text-lg md:text-xl text-eclipse-muted mb-10 max-w-2xl mx-auto leading-relaxed">
+                            Eclipse AI is your personalized tutor, adaptive learning platform, and reasoning engine for mathematics and science. Master complex concepts through guided discovery.
+                        </p>
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
+                            <button onClick={() => setCurrentView('chat')} className="w-full sm:w-auto px-8 py-4 rounded-full bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)] flex items-center justify-center gap-2">
+                                Start Learning Free <Icon name="arrow-right" size={18} />
+                            </button>
+                            <button onClick={() => setCurrentView('courses')} className="w-full sm:w-auto px-8 py-4 rounded-full glass text-white font-semibold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+                                <Icon name="book-open" size={18} /> Explore Courses
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto w-full">
+                        <FeatureCard icon="brain" title="Socratic Tutoring" desc="AI that teaches by asking the right questions, guiding you to the answer naturally." />
+                        <FeatureCard icon="network" title="Concept Mapping" desc="Visualize how algorithms, formulas, and scientific laws connect to one another." />
+                        <FeatureCard icon="target" title="Adaptive Practice" desc="Problems dynamically adjust to your skill level, ensuring you are always challenged." />
+                        <FeatureCard icon="microscope" title="Virtual Lab & Graphing" desc="Interactive workspaces for visualizing calculus transformations and physics." />
+                        <FeatureCard icon="layers" title="Knowledge Vault" desc="Everything you learn is automatically synthesized into personal, searchable notes." />
+                        <FeatureCard icon="graduation-cap" title="Exam Prep" desc="Rigorous mock exams and mastery tracking for AP Calculus, Biology, and SATs." />
+                    </div>
+                </div>
+            );
+        }
+
+        function FeatureCard({ icon, title, desc }) {
+            return (
+                <div className="glass p-6 rounded-2xl text-left hover:-translate-y-1 transition-transform cursor-pointer border border-white/5 hover:border-indigo-500/30">
+                    <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 mb-4">
+                        <Icon name={icon} size={24} />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">{title}</h3>
+                    <p className="text-eclipse-muted text-sm leading-relaxed">{desc}</p>
+                </div>
+            );
+        }
+
+        // --- Chat Interface (ChatGPT Style) ---
+        function ChatView() {
+            return (
+                <div className="flex flex-grow h-[calc(100vh-64px)] overflow-hidden">
+                    {/* Sidebar */}
+                    <div className="w-64 glass hidden md:flex flex-col border-r border-eclipse-border">
+                        <div className="p-4">
+                            <button className="w-full flex items-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-colors text-sm font-medium">
+                                <Icon name="plus" size={16} /> New Chat
+                            </button>
+                        </div>
+                        <div className="flex-grow overflow-y-auto px-3">
+                            <div className="text-xs font-semibold text-eclipse-muted mb-2 px-2 mt-4">Today</div>
+                            <SidebarItem text="Derivative of e^(2x)" />
+                            <SidebarItem text="Cellular Respiration Setup" />
+                            <div className="text-xs font-semibold text-eclipse-muted mb-2 px-2 mt-6">Previous 7 Days</div>
+                            <SidebarItem text="AP Calc AB Practice Exam" />
+                            <SidebarItem text="Newton's Third Law" />
+                            <SidebarItem text="Socratic Mode: Limits" />
+                        </div>
+                        <div className="p-4 border-t border-eclipse-border">
+                            <div className="flex items-center gap-3 px-2">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500"></div>
+                                <div className="text-sm font-medium">Student Profile</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Main Chat Area */}
+                    <div className="flex-grow flex flex-col relative bg-eclipse-surface">
+                        {/* Header options */}
+                        <div className="h-14 border-b border-eclipse-border flex items-center justify-between px-6 glass absolute top-0 w-full z-10">
+                            <div className="flex gap-4">
+                                <span className="text-sm font-medium text-white flex items-center gap-2 cursor-pointer"><Icon name="cpu" size={16} className="text-indigo-400"/> Teacher Mode</span>
+                                <span className="text-sm font-medium text-eclipse-muted hover:text-white flex items-center gap-2 cursor-pointer"><Icon name="message-circle-question" size={16}/> Socratic</span>
+                            </div>
+                            <div className="flex gap-4">
+                                <Icon name="settings" size={18} className="text-eclipse-muted cursor-pointer hover:text-white" />
+                            </div>
+                        </div>
+
+                        {/* Messages */}
+                        <div className="flex-grow overflow-y-auto p-6 pt-24 pb-32">
+                            <div className="max-w-3xl mx-auto space-y-8">
+                                {/* AI Welcome Message */}
+                                <div className="flex gap-4">
+                                    <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
+                                        <div className="w-4 h-4 rounded-full bg-eclipse-bg"></div>
+                                    </div>
+                                    <div className="flex-grow">
+                                        <p className="font-semibold text-white mb-1">Eclipse AI</p>
+                                        <p className="text-eclipse-muted leading-relaxed">
+                                            Welcome to your personalized learning workspace. I can act as your tutor, analyze uploaded homework, or guide you through complex problem-solving. 
+                                            <br/><br/>What would you like to explore today?
+                                        </p>
+                                        <div className="flex gap-2 mt-4 flex-wrap">
+                                            <SuggestionBadge text="Explain Quantum Entanglement" />
+                                            <SuggestionBadge text="Help me with AP Calculus" />
+                                            <SuggestionBadge text="Generate Biology Flashcards" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* User Message */}
+                                <div className="flex gap-4">
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex-shrink-0"></div>
+                                    <div className="flex-grow">
+                                        <p className="font-semibold text-white mb-1">You</p>
+                                        <p className="text-eclipse-text leading-relaxed">
+                                            I'm struggling with the chain rule in calculus. Can you explain it conceptually without just giving me the formula?
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* AI Response */}
+                                <div className="flex gap-4">
+                                    <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
+                                        <div className="w-4 h-4 rounded-full bg-eclipse-bg"></div>
+                                    </div>
+                                    <div className="flex-grow">
+                                        <p className="font-semibold text-white mb-1">Eclipse AI</p>
+                                        <p className="text-eclipse-muted leading-relaxed mb-4">
+                                            Absolutely. Let's think about the chain rule conceptually before looking at the math.
+                                        </p>
+                                        <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-4 text-sm font-mono text-indigo-300">
+                                            Imagine a set of gears. Gear A turns Gear B, and Gear B turns Gear C.<br/><br/>
+                                            If you want to know how fast Gear C turns relative to Gear A, you have to multiply the rates: (Rate of B relative to A) × (Rate of C relative to B).
+                                        </div>
+                                        <p className="text-eclipse-muted leading-relaxed">
+                                            In calculus, the "gears" are nested functions, like <code>f(g(x))</code>. To find the overall rate of change (the derivative), we multiply the rate of change of the outside function by the rate of change of the inside function.
+                                            <br/><br/>Does that analogy make sense, or should we look at a specific example like a car driving up a mountain?
+                                        </p>
+                                        <div className="flex gap-3 mt-4 text-eclipse-muted">
+                                            <Icon name="copy" size={16} className="cursor-pointer hover:text-white" />
+                                            <Icon name="thumbs-up" size={16} className="cursor-pointer hover:text-white" />
+                                            <Icon name="thumbs-down" size={16} className="cursor-pointer hover:text-white" />
+                                            <span className="text-xs ml-auto cursor-pointer hover:text-white flex items-center gap-1"><Icon name="bookmark" size={14}/> Save to Vault</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Input Area */}
+                        <div className="absolute bottom-0 w-full bg-gradient-to-t from-eclipse-surface via-eclipse-surface to-transparent pt-10 pb-6 px-6">
+                            <div className="max-w-3xl mx-auto relative">
+                                <div className="absolute left-4 top-4 flex gap-2">
+                                    <button className="text-eclipse-muted hover:text-white transition-colors" title="Upload Document"><Icon name="paperclip" size={20} /></button>
+                                    <button className="text-eclipse-muted hover:text-white transition-colors" title="Open Whiteboard"><Icon name="pen-tool" size={20} /></button>
+                                </div>
+                                <input 
+                                    type="text" 
+                                    placeholder="Message Eclipse AI... (Type / for commands)" 
+                                    className="w-full bg-eclipse-bg border border-eclipse-border rounded-2xl py-4 pl-20 pr-14 text-white focus:outline-none focus:border-indigo-500/50 shadow-lg"
+                                />
+                                <button className="absolute right-3 top-3 w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center text-white hover:bg-indigo-500 transition-colors">
+                                    <Icon name="arrow-up" size={18} />
+                                </button>
+                                <p className="text-center text-xs text-eclipse-muted mt-3">Eclipse AI can make mistakes. Verify important scientific and mathematical facts.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function SidebarItem({ text }) {
+            return (
+                <div className="truncate px-3 py-2 text-sm text-eclipse-muted hover:bg-white/5 hover:text-white rounded-lg cursor-pointer transition-colors">
+                    {text}
+                </div>
+            );
+        }
+
+        function SuggestionBadge({ text }) {
+            return (
+                <div className="text-xs px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 cursor-pointer transition-colors text-eclipse-muted hover:text-white">
+                    {text}
+                </div>
+            );
+        }
+
+        // --- Courses View ---
+        function CoursesView() {
+            const courses = [
+                { title: "AP Calculus BC", desc: "Master integrals, series, and advanced derivatives.", progress: 65, difficulty: "Advanced", lessons: 84 },
+                { title: "AP Biology", desc: "Cellular structure, genetics, and ecology.", progress: 32, difficulty: "Advanced", lessons: 120 },
+                { title: "Precalculus", desc: "Trigonometry, vectors, and complex numbers.", progress: 100, difficulty: "Intermediate", lessons: 60 },
+                { title: "Data Science Foundations", desc: "Probability, distributions, and Python basics.", progress: 10, difficulty: "Intermediate", lessons: 45 },
+                { title: "Physics: Mechanics", desc: "Kinematics, Newton's laws, and energy.", progress: 0, difficulty: "Hard", lessons: 55 },
+                { title: "AMC 12 Prep", desc: "Competition math, number theory, game theory.", progress: 0, difficulty: "Expert", lessons: 40 }
+            ];
+
+            return (
+                <div className="max-w-6xl mx-auto w-full p-6 pt-10">
+                    <div className="flex justify-between items-end mb-8">
+                        <div>
+                            <h2 className="text-3xl font-bold mb-2">Learning Paths</h2>
+                            <p className="text-eclipse-muted">Structured curricula tailored to your goals.</p>
+                        </div>
+                        <div className="flex gap-2">
+                            <button className="px-4 py-2 text-sm glass rounded-lg text-white"><Icon name="filter" size={16} className="inline mr-2"/>Filter</button>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {courses.map((course, i) => (
+                            <div key={i} className="glass rounded-2xl p-6 flex flex-col border border-white/5 hover:border-indigo-500/30 transition-all hover:-translate-y-1">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div className={`text-xs font-semibold px-2 py-1 rounded ${course.progress === 100 ? 'bg-green-500/20 text-green-400' : 'bg-indigo-500/20 text-indigo-400'}`}>
+                                        {course.difficulty}
+                                    </div>
+                                    <Icon name="bookmark" size={18} className="text-eclipse-muted cursor-pointer hover:text-white" />
+                                </div>
+                                <h3 className="text-xl font-bold mb-2">{course.title}</h3>
+                                <p className="text-sm text-eclipse-muted mb-6 flex-grow">{course.desc}</p>
+                                
+                                <div className="mb-4">
+                                    <div className="flex justify-between text-xs text-eclipse-muted mb-1">
+                                        <span>{course.progress}% Completed</span>
+                                        <span>{course.lessons} Lessons</span>
+                                    </div>
+                                    <div className="w-full bg-eclipse-bg rounded-full h-1.5">
+                                        <div className={`h-1.5 rounded-full ${course.progress === 100 ? 'bg-green-500' : 'bg-indigo-500'}`} style={{ width: `${course.progress}%` }}></div>
+                                    </div>
+                                </div>
+                                
+                                <button className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-colors ${course.progress === 100 ? 'bg-white/5 text-white hover:bg-white/10' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>
+                                    {course.progress === 0 ? 'Start Course' : course.progress === 100 ? 'Review' : 'Continue Learning'}
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // --- Progress Dashboard ---
+        function ProgressView() {
+            return (
+                <div className="max-w-6xl mx-auto w-full p-6 pt-10">
+                    <h2 className="text-3xl font-bold mb-8">Progress & Analytics</h2>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <StatCard title="Current Streak" value="14 Days" icon="flame" color="text-orange-400" bg="bg-orange-400/10" />
+                        <StatCard title="Total XP" value="12,450" icon="star" color="text-yellow-400" bg="bg-yellow-400/10" />
+                        <StatCard title="Questions Answered" value="842" icon="check-circle" color="text-green-400" bg="bg-green-400/10" />
+                        <StatCard title="Hours Studied" value="48.5" icon="clock" color="text-blue-400" bg="bg-blue-400/10" />
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="lg:col-span-2 glass rounded-2xl p-6 border border-white/5">
+                            <h3 className="text-lg font-semibold mb-4">Mastery Breakdown</h3>
+                            <div className="space-y-6">
+                                <SkillBar skill="Differential Calculus" percentage={85} />
+                                <SkillBar skill="Integral Calculus" percentage={45} />
+                                <SkillBar skill="Cellular Biology" percentage={70} />
+                                <SkillBar skill="Scientific Reasoning" percentage={92} />
+                            </div>
+                        </div>
+                        
+                        <div className="glass rounded-2xl p-6 border border-white/5 flex flex-col">
+                            <h3 className="text-lg font-semibold mb-4">Recent Achievements</h3>
+                            <div className="flex-grow space-y-4">
+                                <Achievement icon="zap" title="Speed Thinker" desc="Answered 10 practice problems perfectly under 5 minutes." date="Today" />
+                                <Achievement icon="award" title="Calculus Initiate" desc="Completed the Limits unit." date="Yesterday" />
+                                <Achievement icon="microscope" title="Lab Tech" desc="Ran 5 virtual biology simulations." date="3 days ago" />
+                            </div>
+                            <button className="w-full mt-4 py-2 border border-white/10 rounded-xl text-sm hover:bg-white/5 transition-colors">View All Badges</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function StatCard({ title, value, icon, color, bg }) {
+            return (
+                <div className="glass rounded-2xl p-6 border border-white/5 flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${bg} ${color}`}>
+                        <Icon name={icon} size={24} />
+                    </div>
+                    <div>
+                        <p className="text-sm text-eclipse-muted">{title}</p>
+                        <p className="text-2xl font-bold text-white">{value}</p>
+                    </div>
+                </div>
+            );
+        }
+
+        function SkillBar({ skill, percentage }) {
+            return (
+                <div>
+                    <div className="flex justify-between text-sm mb-1">
+                        <span className="font-medium">{skill}</span>
+                        <span className="text-eclipse-muted">{percentage}% Mastery</span>
+                    </div>
+                    <div className="w-full bg-eclipse-bg rounded-full h-2">
+                        <div className="bg-indigo-500 h-2 rounded-full" style={{ width: `${percentage}%` }}></div>
+                    </div>
+                </div>
+            );
+        }
+
+        function Achievement({ icon, title, desc, date }) {
+            return (
+                <div className="flex gap-3 items-start">
+                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 text-yellow-400 mt-1">
+                        <Icon name={icon} size={14} />
+                    </div>
+                    <div>
+                        <h4 className="text-sm font-semibold">{title}</h4>
+                        <p className="text-xs text-eclipse-muted leading-tight">{desc}</p>
+                        <p className="text-[10px] text-eclipse-muted/50 mt-1">{date}</p>
+                    </div>
+                </div>
+            );
+        }
+
+        // --- Pricing View ---
+        function PricingView() {
+            return (
+                <div className="max-w-4xl mx-auto w-full p-6 pt-10 text-center pb-20">
+                    <h2 className="text-4xl font-bold mb-4">Unlock Your Full Potential</h2>
+                    <p className="text-eclipse-muted mb-12">Choose the plan that fits your academic goals.</p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* Free Tier */}
+                        <div className="glass rounded-3xl p-8 border border-white/5 flex flex-col text-left">
+                            <h3 className="text-2xl font-bold mb-2">Basic</h3>
+                            <p className="text-eclipse-muted text-sm mb-6">For casual learners.</p>
+                            <div className="text-4xl font-bold mb-6">$0<span className="text-lg font-normal text-eclipse-muted">/mo</span></div>
+                            
+                            <ul className="space-y-4 mb-8 flex-grow">
+                                <PricingFeature text="Limited daily AI chats" />
+                                <PricingFeature text="Basic interactive courses" />
+                                <PricingFeature text="Standard practice problems" />
+                                <PricingFeature text="Community support" />
+                            </ul>
+                            <button className="w-full py-3 rounded-xl border border-white/10 text-white font-semibold hover:bg-white/5 transition-colors">Current Plan</button>
+                        </div>
+
+                        {/* Pro Tier */}
+                        <div className="glass rounded-3xl p-8 border border-indigo-500/50 bg-indigo-900/10 flex flex-col text-left relative overflow-hidden">
+                            <div className="absolute top-0 right-0 bg-indigo-600 text-xs font-bold px-3 py-1 rounded-bl-lg">POPULAR</div>
+                            <h3 className="text-2xl font-bold mb-2 text-indigo-400">Pro</h3>
+                            <p className="text-eclipse-muted text-sm mb-6">For dedicated students & exam prep.</p>
+                            <div className="text-4xl font-bold mb-6">$19<span className="text-lg font-normal text-eclipse-muted">/mo</span></div>
+                            
+                            <ul className="space-y-4 mb-8 flex-grow">
+                                <PricingFeature text="Unlimited AI Tutor chats" />
+                                <PricingFeature text="Full AP & College course access" />
+                                <PricingFeature text="Advanced Mistake Analysis Engine" />
+                                <PricingFeature text="Unlimited Practice & Mock Exams" />
+                                <PricingFeature text="Priority AI reasoning speed" />
+                            </ul>
+                            <button className="w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition-colors shadow-[0_0_15px_rgba(99,102,241,0.4)]">Upgrade to Pro</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function PricingFeature({ text }) {
+            return (
+                <li className="flex items-start gap-3 text-sm">
+                    <Icon name="check" size={18} className="text-indigo-400 flex-shrink-0" />
+                    <span>{text}</span>
+                </li>
+            );
+        }
+
+        // Render App
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
