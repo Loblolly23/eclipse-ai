@@ -2,69 +2,67 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eclipse AI</title>
-    <link rel="icon" type="image/jpeg" href="2.jpg">
+    <title>Eclipse AI | Master the Logic</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { background-color: #050505; color: #e2e8f0; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(15, 15, 20, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        :root { --bg: #050505; --glass: rgba(20, 20, 25, 0.7); }
+        body { background: var(--bg); color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .glass { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
-    <div id="app" class="flex h-screen overflow-hidden">
+    <div id="root" class="flex h-screen">
         <aside class="w-64 border-r border-white/10 p-6 flex flex-col gap-8">
             <div class="flex items-center gap-3 font-bold text-xl">
-                <img src="2.jpg" alt="Logo" class="w-8 h-8 rounded-full border border-white/20">
-                Eclipse
+                <img src="2.jpg" class="w-8 h-8 rounded-full border border-white/20">
+                Eclipse AI
             </div>
-            <nav class="space-y-4 text-sm text-gray-400">
-                <a href="#" class="flex items-center gap-3 hover:text-white transition"><i data-lucide="database" size="18"></i> Knowledge Vault</a>
-                <a href="#" class="flex items-center gap-3 hover:text-white transition"><i data-lucide="bar-chart-2" size="18"></i> Progress Tracking</a>
+            <nav class="space-y-2 text-sm text-gray-400">
+                <button onclick="setView('dashboard')" class="w-full flex items-center gap-3 p-3 hover:bg-white/5 rounded-lg"><i data-lucide="layout-dashboard"></i> Dashboard</button>
+                <button onclick="setView('chat')" class="w-full flex items-center gap-3 p-3 hover:bg-white/5 rounded-lg"><i data-lucide="message-square"></i> Chat</button>
+                <button onclick="setView('courses')" class="w-full flex items-center gap-3 p-3 hover:bg-white/5 rounded-lg"><i data-lucide="book-open"></i> Courses</button>
             </nav>
         </aside>
 
-        <main class="flex-1 flex flex-col">
+        <main id="main-content" class="flex-1 flex flex-col">
             <header class="h-16 border-b border-white/10 flex items-center justify-between px-8">
-                <div class="flex gap-2 bg-black/50 p-1 rounded-lg border border-white/5">
-                    <button id="lunaBtn" class="px-4 py-1.5 rounded text-sm font-medium bg-indigo-600 transition flex items-center">
-                        <img src="3.jpg" class="w-4 h-4 mr-2 rounded-full"> Luna (Math)
-                    </button>
-                    <button id="solBtn" class="px-4 py-1.5 rounded text-sm font-medium hover:bg-white/10 transition flex items-center">
-                        <img src="4.jpg" class="w-4 h-4 mr-2 rounded-full"> Sol (Science)
-                    </button>
+                <div id="engine-toggle" class="flex gap-1 bg-black/50 p-1 rounded-lg border border-white/10">
+                    <button onclick="setEngine('luna')" id="luna-btn" class="px-4 py-1.5 rounded text-sm bg-indigo-600 flex items-center"><img src="3.jpg" class="w-4 h-4 mr-2 rounded-full"> Luna</button>
+                    <button onclick="setEngine('sol')" id="sol-btn" class="px-4 py-1.5 rounded text-sm hover:bg-white/10 flex items-center"><img src="4.jpg" class="w-4 h-4 mr-2 rounded-full"> Sol</button>
                 </div>
-                <button class="bg-white text-black px-5 py-1.5 rounded-full text-sm font-bold hover:bg-gray-200">Sign Up</button>
             </header>
-
-            <section class="flex-1 flex items-center justify-center p-8">
-                <div class="w-full max-w-2xl glass p-8 rounded-2xl border border-white/10">
-                    <h2 id="engineTitle" class="text-2xl font-bold mb-6">Luna Math Engine</h2>
-                    <textarea class="w-full h-40 bg-black/40 border border-white/10 rounded-xl p-4 text-sm focus:border-indigo-500 outline-none transition" placeholder="Ask your question..."></textarea>
-                    <button class="w-full mt-4 bg-indigo-600 py-3 rounded-xl font-semibold hover:bg-indigo-500 transition">Submit Request</button>
-                </div>
-            </section>
+            
+            <div id="view" class="p-8"></div>
         </main>
     </div>
 
     <script>
         lucide.createIcons();
-        const lunaBtn = document.getElementById('lunaBtn');
-        const solBtn = document.getElementById('solBtn');
-        const engineTitle = document.getElementById('engineTitle');
+        const state = { view: 'dashboard', engine: 'luna' };
 
-        lunaBtn.onclick = () => {
-            engineTitle.innerText = 'Luna Math Engine';
-            lunaBtn.className = 'px-4 py-1.5 rounded text-sm font-medium bg-indigo-600 transition flex items-center';
-            solBtn.className = 'px-4 py-1.5 rounded text-sm font-medium hover:bg-white/10 transition flex items-center';
-        };
+        function setView(view) {
+            state.view = view;
+            const viewDiv = document.getElementById('view');
+            if(view === 'chat') {
+                viewDiv.innerHTML = `<div class="max-w-2xl mx-auto glass p-8 rounded-3xl">
+                    <h2 class="text-2xl font-bold mb-4">${state.engine === 'luna' ? 'Luna' : 'Sol'} Reasoning Engine</h2>
+                    <textarea class="w-full h-40 bg-black/40 border border-white/10 rounded-xl p-4 text-sm" placeholder="Ask your question..."></textarea>
+                    <button class="w-full mt-4 bg-indigo-600 py-3 rounded-xl font-bold">Ask AI</button>
+                </div>`;
+            } else {
+                viewDiv.innerHTML = `<h1 class="text-3xl font-bold">Welcome to your ${view}</h1>`;
+            }
+        }
 
-        solBtn.onclick = () => {
-            engineTitle.innerText = 'Sol Science Engine';
-            solBtn.className = 'px-4 py-1.5 rounded text-sm font-medium bg-yellow-600 transition flex items-center';
-            lunaBtn.className = 'px-4 py-1.5 rounded text-sm font-medium hover:bg-white/10 transition flex items-center';
-        };
+        function setEngine(engine) {
+            state.engine = engine;
+            document.getElementById('luna-btn').className = engine === 'luna' ? 'px-4 py-1.5 rounded text-sm bg-indigo-600 flex items-center' : 'px-4 py-1.5 rounded text-sm hover:bg-white/10 flex items-center';
+            document.getElementById('sol-btn').className = engine === 'sol' ? 'px-4 py-1.5 rounded text-sm bg-yellow-600 flex items-center' : 'px-4 py-1.5 rounded text-sm hover:bg-white/10 flex items-center';
+            setView(state.view);
+        }
+        
+        setView('dashboard');
     </script>
 </body>
 </html>
