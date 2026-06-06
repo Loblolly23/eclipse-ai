@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eclipse AI | Learn How To Think</title>
     
+    <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
+    <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -22,21 +25,18 @@
                             surface: '#121217',
                             border: '#2A2A35',
                             accent: '#6366F1',
-                            accentGlow: 'rgba(99, 102, 241, 0.15)',
                             text: '#E2E8F0',
                             muted: '#94A3B8',
                             sol: '#EAB308',
                             luna: '#8B5CF6'
                         }
-                    },
-                    animation: {
-                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     }
                 }
             }
         }
     </script>
 
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
@@ -46,7 +46,6 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow-x: hidden;
         }
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #2A2A35; border-radius: 4px; }
@@ -76,15 +75,18 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- Icons ---
+        // Image Placeholders
+        const LOGO_IMG = "https://ui-avatars.com/api/?name=E+AI&background=121217&color=fff";
+        const LUNA_IMG = "https://ui-avatars.com/api/?name=L&background=8B5CF6&color=fff";
+        const SOL_IMG = "https://ui-avatars.com/api/?name=S&background=EAB308&color=000";
+
+        // Icons
         const Icon = ({ name, size = 20, className = "" }) => {
-            React.useEffect(() => {
-                lucide.createIcons();
-            });
+            React.useEffect(() => { lucide.createIcons(); });
             return <i data-lucide={name} width={size} height={size} className={className}></i>;
         };
 
-        // --- Main App Component ---
+        // Main App
         function App() {
             const [currentView, setCurrentView] = useState('home');
 
@@ -97,7 +99,7 @@
                     
                     <main className="flex-grow flex flex-col pt-16">
                         {currentView === 'home' && <HomeView setCurrentView={setCurrentView} />}
-                        {currentView === 'chat' && <ChatView />}
+                        {currentView === 'chat' && <ChatView setCurrentView={setCurrentView} />}
                         {currentView === 'courses' && <CoursesView />}
                         {currentView === 'progress' && <ProgressView />}
                         {currentView === 'pricing' && <PricingView />}
@@ -107,15 +109,14 @@
             );
         }
 
-        // --- Navigation Bar ---
+        // Navigation
         function Navbar({ currentView, setCurrentView }) {
             const navItems = ['Home', 'Chat', 'Courses', 'Progress', 'Pricing'];
             
             return (
                 <nav className="fixed top-0 w-full glass z-50 px-6 py-4 flex justify-between items-center">
-                    {/* Main Eclipse Logo */}
                     <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentView('home')}>
-                        <img src="2.jpg" alt="Eclipse AI" className="w-9 h-9 rounded-full border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.1)] object-cover" />
+                        <img src={LOGO_IMG} alt="Eclipse AI" className="w-9 h-9 rounded-full border border-white/10 object-cover" />
                         <span className="text-xl font-bold tracking-tight text-white">Eclipse AI</span>
                     </div>
                     
@@ -139,7 +140,7 @@
             );
         }
 
-        // --- Auth View (Sign Up / Login) ---
+        // Auth
         function AuthView({ setCurrentView }) {
             const [isLogin, setIsLogin] = useState(false);
 
@@ -147,12 +148,13 @@
                 <div className="flex-grow flex items-center justify-center p-6">
                     <div className="glass p-8 rounded-3xl w-full max-w-md border border-white/10 shadow-2xl">
                         <div className="flex justify-center mb-6">
-                            <img src="2.jpg" alt="Logo" className="w-16 h-16 rounded-full border border-white/20 shadow-lg object-cover" />
+                            <img src={LOGO_IMG} alt="Logo" className="w-16 h-16 rounded-full border border-white/20 shadow-lg object-cover" />
                         </div>
                         <h2 className="text-2xl font-bold text-center text-white mb-2">{isLogin ? 'Welcome Back' : 'Join Eclipse AI'}</h2>
                         <p className="text-center text-eclipse-muted mb-8">{isLogin ? 'Log in to continue your learning journey.' : 'Start mastering math and science today.'}</p>
                         
-                        <button className="w-full flex items-center justify-center gap-3 glass py-3 rounded-xl hover:bg-white/5 transition-all mb-4 border border-white/10 font-medium">
+                        {/* FIX: Google Login now correctly routes to Chat */}
+                        <button type="button" onClick={() => setCurrentView('chat')} className="w-full flex items-center justify-center gap-3 glass py-3 rounded-xl hover:bg-white/5 transition-all mb-4 border border-white/10 font-medium">
                             <svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                             Continue with Google
                         </button>
@@ -186,66 +188,82 @@
             );
         }
 
-        // --- Chat Interface ---
-        function ChatView() {
-            const [agent, setAgent] = useState('luna'); // 'luna' or 'sol'
+        // Chat View
+        function ChatView({ setCurrentView }) {
+            const [agent, setAgent] = useState('luna');
             const [inputText, setInputText] = useState('');
             const [isTyping, setIsTyping] = useState(false);
             const chatEndRef = useRef(null);
 
-            // Initial messages
-            const [messages, setMessages] = useState([
-                { 
-                    role: 'ai', 
-                    agent: 'luna',
-                    text: "Hi, I'm Luna. I specialize in mathematical reasoning, algebra, calculus, and logic. Let's work through some problems step-by-step. What are you studying right now?" 
-                }
+            // FIX: Real functional history state
+            const createGreeting = (a) => ({
+                role: 'ai', 
+                agent: a,
+                text: a === 'luna' 
+                    ? "Hi, I'm Luna. I specialize in mathematical reasoning. What are you studying right now?" 
+                    : "Hello, I'm Sol. I specialize in the sciences. What concepts can we explore today?"
+            });
+
+            const [conversations, setConversations] = useState([
+                { id: 1, title: 'New Conversation', messages: [createGreeting('luna')] }
             ]);
+            const [activeId, setActiveId] = useState(1);
 
-            // Scroll to bottom when messages update
-            useEffect(() => {
-                chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-            }, [messages, isTyping]);
+            const activeConversation = conversations.find(c => c.id === activeId) || conversations[0];
+            const messages = activeConversation.messages;
 
-            // Handle switching agents
+            // Auto-scroll
+            useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, isTyping]);
+
+            // Handle New Conversation
+            const startNewConversation = () => {
+                const newId = Date.now();
+                setConversations([{ id: newId, title: 'New Conversation', messages: [createGreeting(agent)] }, ...conversations]);
+                setActiveId(newId);
+            };
+
+            // Switch Agents
             const handleAgentSwitch = (newAgent) => {
+                if (agent === newAgent) return;
                 setAgent(newAgent);
-                setMessages(prev => [
-                    ...prev,
-                    { 
-                        role: 'system', 
-                        text: `Switched to ${newAgent === 'luna' ? 'Luna (Math Engine)' : 'Sol (Science Engine)'}` 
-                    },
-                    {
-                        role: 'ai',
-                        agent: newAgent,
-                        text: newAgent === 'luna' 
-                            ? "Luna here. Ready to tackle some math?" 
-                            : "Hello, I'm Sol. I specialize in biology, chemistry, and physics. What scientific concepts can we explore today?"
-                    }
+                updateCurrentConversation([
+                    ...messages,
+                    { role: 'system', text: `Switched to ${newAgent === 'luna' ? 'Luna (Math Engine)' : 'Sol (Science Engine)'}` },
+                    createGreeting(newAgent)
                 ]);
             };
 
-            // Simulate AI response logic
+            const updateCurrentConversation = (newMessages, newTitle = null) => {
+                setConversations(prev => prev.map(c => {
+                    if (c.id === activeId) {
+                        return { ...c, messages: newMessages, title: newTitle || c.title };
+                    }
+                    return c;
+                }));
+            };
+
+            // Handle Submission
             const handleSubmit = (e) => {
                 e.preventDefault();
                 if (!inputText.trim()) return;
 
                 const userText = inputText;
-                setMessages(prev => [...prev, { role: 'user', text: userText }]);
+                const updatedMessages = [...messages, { role: 'user', text: userText }];
+                
+                // Set title if it's the first user message
+                const newTitle = messages.length <= 2 ? userText.slice(0, 25) + "..." : activeConversation.title;
+                
+                updateCurrentConversation(updatedMessages, newTitle);
                 setInputText('');
                 setIsTyping(true);
 
-                // Mock API Delay
+                // Simulate AI
                 setTimeout(() => {
-                    let aiReply = "";
-                    if (agent === 'luna') {
-                        aiReply = "That's an interesting mathematical approach. Before we jump to the formula, what do you think is the fundamental relationship between those variables? Let's reason through the first step together.";
-                    } else {
-                        aiReply = "Great question. In scientific terms, this relates to conservation laws. If energy in a closed system cannot be created or destroyed, how do you think it applies to the reaction you just described?";
-                    }
-
-                    setMessages(prev => [...prev, { role: 'ai', agent: agent, text: aiReply }]);
+                    let aiReply = agent === 'luna' 
+                        ? "That's an interesting mathematical approach. Before we jump to the formula, let's break down the variables. What is your first step?" 
+                        : "Great question. In scientific terms, we must consider the initial state of the system. How does energy transfer apply here?";
+                    
+                    updateCurrentConversation([...updatedMessages, { role: 'ai', agent: agent, text: aiReply }], newTitle);
                     setIsTyping(false);
                 }, 1500);
             };
@@ -253,55 +271,58 @@
             return (
                 <div className="flex flex-grow h-[calc(100vh-64px)] overflow-hidden">
                     {/* Sidebar */}
-                    <div className="w-64 glass hidden md:flex flex-col border-r border-eclipse-border">
-                        <div className="p-4">
-                            <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-white transition-colors text-sm font-bold shadow-lg">
+                    <div className="w-64 glass hidden md:flex flex-col border-r border-eclipse-border relative">
+                        <div className="p-4 border-b border-white/5">
+                            <button onClick={startNewConversation} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-white transition-colors text-sm font-bold shadow-lg">
                                 <Icon name="plus" size={16} /> New Conversation
                             </button>
                         </div>
-                        <div className="flex-grow overflow-y-auto px-3">
-                            <div className="text-xs font-semibold text-eclipse-muted mb-2 px-2 mt-2">Today</div>
-                            <SidebarItem text="Derivative of e^(2x)" />
-                            <SidebarItem text="Cellular Respiration Setup" />
-                            <div className="text-xs font-semibold text-eclipse-muted mb-2 px-2 mt-6">Previous</div>
-                            <SidebarItem text="AP Calc AB Practice Exam" />
-                            <SidebarItem text="Newton's Third Law" />
+                        
+                        {/* FIX: Agent Switcher added to sidebar */}
+                        <div className="px-4 mt-4 mb-2">
+                            <p className="text-xs font-semibold text-eclipse-muted mb-2 uppercase tracking-wider">Active Agent</p>
+                            <div className="flex bg-black/60 p-1 rounded-xl border border-white/5 shadow-inner">
+                                <button 
+                                    onClick={() => handleAgentSwitch('luna')} 
+                                    className={`flex-1 py-1.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${agent === 'luna' ? 'bg-[#8B5CF6] text-white shadow-lg' : 'text-eclipse-muted hover:text-white'}`}
+                                >
+                                    <img src={LUNA_IMG} className="w-4 h-4 rounded-full" /> Luna
+                                </button>
+                                <button 
+                                    onClick={() => handleAgentSwitch('sol')} 
+                                    className={`flex-1 py-1.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${agent === 'sol' ? 'bg-[#EAB308] text-black shadow-lg' : 'text-eclipse-muted hover:text-white'}`}
+                                >
+                                    <img src={SOL_IMG} className="w-4 h-4 rounded-full" /> Sol
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* FIX: Functional History */}
+                        <div className="flex-grow overflow-y-auto px-3 pb-24">
+                            <div className="text-xs font-semibold text-eclipse-muted mb-2 px-2 mt-4 uppercase tracking-wider">History</div>
+                            {conversations.map(conv => (
+                                <div 
+                                    key={conv.id} 
+                                    onClick={() => setActiveId(conv.id)}
+                                    className={`truncate px-3 py-2 text-sm rounded-lg cursor-pointer transition-colors mb-1 ${activeId === conv.id ? 'bg-indigo-500/20 text-indigo-300' : 'text-eclipse-muted hover:bg-white/5 hover:text-white'}`}
+                                >
+                                    {conv.title}
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* FIX: Added Upgrade Button to Sidebar */}
+                        <div className="absolute bottom-0 w-full p-4 border-t border-white/5 bg-eclipse-surface/80 backdrop-blur">
+                            <button onClick={() => setCurrentView('pricing')} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 glass border-indigo-500/30 hover:bg-indigo-500/10 rounded-xl text-indigo-300 transition-colors text-sm font-bold">
+                                <Icon name="zap" size={16} /> Upgrade to Pro
+                            </button>
                         </div>
                     </div>
 
                     {/* Main Chat Area */}
                     <div className="flex-grow flex flex-col relative bg-eclipse-surface">
-                        
-                        {/* Header: Agent Switcher */}
-                        <div className="h-16 border-b border-eclipse-border flex items-center justify-between px-6 glass absolute top-0 w-full z-10">
-                            
-                            {/* Sol/Luna Toggle */}
-                            <div className="flex bg-black/60 p-1 rounded-xl border border-white/5 shadow-inner">
-                                <button 
-                                    onClick={() => handleAgentSwitch('luna')} 
-                                    className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${agent === 'luna' ? 'bg-[#8B5CF6] text-white shadow-lg' : 'text-eclipse-muted hover:text-white hover:bg-white/5'}`}
-                                >
-                                    <img src="3.jpg" className="w-5 h-5 rounded-full object-cover border border-white/20" /> 
-                                    Luna <span className="hidden sm:inline font-normal opacity-80">| Math</span>
-                                </button>
-                                <button 
-                                    onClick={() => handleAgentSwitch('sol')} 
-                                    className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${agent === 'sol' ? 'bg-[#EAB308] text-black shadow-lg' : 'text-eclipse-muted hover:text-white hover:bg-white/5'}`}
-                                >
-                                    <img src="4.jpg" className="w-5 h-5 rounded-full object-cover border border-white/20" /> 
-                                    Sol <span className="hidden sm:inline font-normal opacity-80">| Science</span>
-                                </button>
-                            </div>
-
-                            <div className="flex gap-4">
-                                <span className="text-sm font-medium text-eclipse-muted hover:text-white flex items-center gap-2 cursor-pointer transition-colors"><Icon name="message-circle-question" size={16}/> Socratic Mode</span>
-                            </div>
-                        </div>
-
-                        {/* Messages Area */}
-                        <div className="flex-grow overflow-y-auto p-6 pt-24 pb-32">
+                        <div className="flex-grow overflow-y-auto p-6 pt-10 pb-32">
                             <div className="max-w-3xl mx-auto space-y-8">
-                                
                                 {messages.map((msg, idx) => {
                                     if (msg.role === 'system') {
                                         return (
@@ -310,9 +331,8 @@
                                             </div>
                                         );
                                     }
-
                                     const isUser = msg.role === 'user';
-                                    const agentImage = msg.agent === 'luna' ? '3.jpg' : '4.jpg';
+                                    const agentImage = msg.agent === 'luna' ? LUNA_IMG : SOL_IMG;
                                     const agentName = msg.agent === 'luna' ? 'Luna' : 'Sol';
 
                                     return (
@@ -333,7 +353,7 @@
 
                                 {isTyping && (
                                     <div className="flex gap-4 opacity-70">
-                                        <img src={agent === 'luna' ? '3.jpg' : '4.jpg'} className="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-white/10" alt="typing" />
+                                        <img src={agent === 'luna' ? LUNA_IMG : SOL_IMG} className="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-white/10" alt="typing" />
                                         <div className="flex items-center gap-1">
                                             <div className="w-2 h-2 bg-eclipse-muted rounded-full animate-bounce"></div>
                                             <div className="w-2 h-2 bg-eclipse-muted rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
@@ -345,23 +365,18 @@
                             </div>
                         </div>
 
-                        {/* Input Form */}
                         <div className="absolute bottom-0 w-full bg-gradient-to-t from-eclipse-surface via-eclipse-surface to-transparent pt-10 pb-6 px-6">
                             <form onSubmit={handleSubmit} className="max-w-3xl mx-auto relative">
-                                <div className="absolute left-4 top-4 flex gap-2">
-                                    <button type="button" className="text-eclipse-muted hover:text-white transition-colors"><Icon name="paperclip" size={20} /></button>
-                                </div>
                                 <input 
                                     type="text" 
                                     value={inputText}
                                     onChange={(e) => setInputText(e.target.value)}
                                     placeholder={`Message ${agent === 'luna' ? 'Luna (Math)' : 'Sol (Science)'}...`} 
-                                    className="w-full bg-black/80 border border-white/10 rounded-2xl py-4 pl-14 pr-14 text-white focus:outline-none focus:border-indigo-500 shadow-lg backdrop-blur-md transition-all"
+                                    className="w-full bg-black/80 border border-white/10 rounded-2xl py-4 pl-4 pr-14 text-white focus:outline-none focus:border-indigo-500 shadow-lg backdrop-blur-md transition-all"
                                 />
                                 <button type="submit" disabled={!inputText.trim()} className="absolute right-3 top-3 w-8 h-8 bg-white disabled:bg-white/20 text-black rounded-xl flex items-center justify-center transition-colors">
                                     <Icon name="arrow-up" size={18} />
                                 </button>
-                                <p className="text-center text-xs text-eclipse-muted mt-3">Eclipse AI guides you to the answer. Verify complex facts.</p>
                             </form>
                         </div>
                     </div>
@@ -369,16 +384,68 @@
             );
         }
 
-        function SidebarItem({ text }) {
+        // Courses View
+        function CoursesView() {
+            // FIX: Added comprehensive High School courses, divided by Math/Science
+            const mathCourses = [
+                { title: "Algebra 1", desc: "Linear equations, inequalities, and functions.", diff: "Beginner" },
+                { title: "Geometry", desc: "Proofs, theorems, and spatial reasoning.", diff: "Beginner" },
+                { title: "Algebra 2", desc: "Polynomials, complex numbers, and logarithms.", diff: "Intermediate" },
+                { title: "Precalculus", desc: "Trigonometry, vectors, and limits.", diff: "Intermediate" },
+                { title: "AP Calculus AB", desc: "Derivatives and basic integration.", diff: "Advanced" },
+                { title: "AP Calculus BC", desc: "Advanced integration, sequences, and series.", diff: "Advanced" },
+                { title: "AP Statistics", desc: "Data analysis, probability, and inference.", diff: "Advanced" }
+            ];
+
+            const scienceCourses = [
+                { title: "Earth Science", desc: "Geology, meteorology, and astronomy.", diff: "Beginner" },
+                { title: "Biology", desc: "Cells, genetics, and ecology.", diff: "Beginner" },
+                { title: "Chemistry", desc: "Atomic structure, reactions, and stoichiometry.", diff: "Intermediate" },
+                { title: "Physics", desc: "Kinematics, forces, and energy.", diff: "Intermediate" },
+                { title: "AP Biology", desc: "Advanced evolution and cellular processes.", diff: "Advanced" },
+                { title: "AP Chemistry", desc: "Thermodynamics, kinetics, and equilibrium.", diff: "Advanced" },
+                { title: "AP Physics 1 & 2", desc: "Algebra-based mechanics, electricity & magnetism.", diff: "Advanced" },
+                { title: "AP Physics C", desc: "Calculus-based mechanics and E&M.", diff: "Advanced" }
+            ];
+
+            const renderCourseCard = (course, i) => (
+                <div key={i} className="glass rounded-2xl p-6 flex flex-col border border-white/5 hover:border-indigo-500/30">
+                    <div className="flex justify-between items-start mb-4">
+                        <div className="text-xs font-semibold px-2 py-1 rounded bg-indigo-500/20 text-indigo-400">{course.diff}</div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">{course.title}</h3>
+                    <p className="text-sm text-eclipse-muted mb-6 flex-grow">{course.desc}</p>
+                    <button className="w-full py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700">Start Course</button>
+                </div>
+            );
+
             return (
-                <div className="truncate px-3 py-2 text-sm text-eclipse-muted hover:bg-white/5 hover:text-white rounded-lg cursor-pointer transition-colors">
-                    {text}
+                <div className="max-w-6xl mx-auto w-full p-6 pt-10 pb-20">
+                    <h2 className="text-4xl font-bold mb-2">Curriculum</h2>
+                    <p className="text-eclipse-muted mb-12">Comprehensive high school paths tailored to your level.</p>
+                    
+                    <div className="mb-16">
+                        <h3 className="text-2xl font-bold mb-6 flex items-center gap-3 text-luna">
+                            <Icon name="calculator" /> Mathematics (Luna)
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            {mathCourses.map(renderCourseCard)}
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 className="text-2xl font-bold mb-6 flex items-center gap-3 text-sol">
+                            <Icon name="microscope" /> Sciences (Sol)
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            {scienceCourses.map(renderCourseCard)}
+                        </div>
+                    </div>
                 </div>
             );
         }
 
-        // --- Other Views (Home, Courses, Progress, Pricing) below remain unchanged structurally, but finalized ---
-
+        // Home View
         function HomeView({ setCurrentView }) {
             return (
                 <div className="flex-grow flex flex-col items-center justify-center px-6 pb-20 text-center mt-20">
@@ -391,7 +458,7 @@
                             Learn how to think,<br/>not what to memorize.
                         </h1>
                         <p className="text-lg md:text-xl text-eclipse-muted mb-10 max-w-2xl mx-auto leading-relaxed">
-                            Eclipse AI is your personalized tutor, adaptive learning platform, and reasoning engine for mathematics and science. Master complex concepts through guided discovery.
+                            Eclipse AI is your personalized tutor, adaptive learning platform, and reasoning engine for mathematics and science.
                         </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
                             <button onClick={() => setCurrentView('chat')} className="w-full sm:w-auto px-8 py-4 rounded-full bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)] flex items-center justify-center gap-2">
@@ -424,33 +491,7 @@
             );
         }
 
-        function CoursesView() {
-            const courses = [
-                { title: "AP Calculus BC", desc: "Master integrals, series, and advanced derivatives.", progress: 65, difficulty: "Advanced", lessons: 84 },
-                { title: "AP Biology", desc: "Cellular structure, genetics, and ecology.", progress: 32, difficulty: "Advanced", lessons: 120 },
-                { title: "Precalculus", desc: "Trigonometry, vectors, and complex numbers.", progress: 100, difficulty: "Intermediate", lessons: 60 }
-            ];
-
-            return (
-                <div className="max-w-6xl mx-auto w-full p-6 pt-10">
-                    <h2 className="text-3xl font-bold mb-2">Learning Paths</h2>
-                    <p className="text-eclipse-muted mb-8">Structured curricula tailored to your goals.</p>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {courses.map((course, i) => (
-                            <div key={i} className="glass rounded-2xl p-6 flex flex-col border border-white/5 hover:border-indigo-500/30">
-                                <div className="flex justify-between items-start mb-4">
-                                    <div className="text-xs font-semibold px-2 py-1 rounded bg-indigo-500/20 text-indigo-400">{course.difficulty}</div>
-                                </div>
-                                <h3 className="text-xl font-bold mb-2">{course.title}</h3>
-                                <p className="text-sm text-eclipse-muted mb-6 flex-grow">{course.desc}</p>
-                                <button className="w-full py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700">Continue Learning</button>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
-        }
-
+        // Progress View
         function ProgressView() {
             return (
                 <div className="max-w-6xl mx-auto w-full p-6 pt-10">
@@ -462,6 +503,7 @@
             );
         }
 
+        // Pricing View
         function PricingView() {
             return (
                 <div className="max-w-4xl mx-auto w-full p-6 pt-10 text-center pb-20">
@@ -469,7 +511,6 @@
                     <p className="text-eclipse-muted mb-12">Choose the plan that fits your academic goals.</p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {/* Free Tier */}
                         <div className="glass rounded-3xl p-8 border border-white/5 flex flex-col text-left">
                             <h3 className="text-2xl font-bold mb-2">Basic</h3>
                             <p className="text-eclipse-muted text-sm mb-6">For casual learners.</p>
@@ -481,7 +522,6 @@
                             <button className="w-full py-3 rounded-xl border border-white/10 text-white font-semibold hover:bg-white/5 transition-colors">Current Plan</button>
                         </div>
 
-                        {/* Pro Tier */}
                         <div className="glass rounded-3xl p-8 border border-indigo-500/50 bg-indigo-900/10 flex flex-col text-left relative overflow-hidden">
                             <div className="absolute top-0 right-0 bg-indigo-600 text-xs font-bold px-3 py-1 rounded-bl-lg">POPULAR</div>
                             <h3 className="text-2xl font-bold mb-2 text-indigo-400">Pro</h3>
@@ -499,7 +539,6 @@
             );
         }
 
-        // Render Application
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
