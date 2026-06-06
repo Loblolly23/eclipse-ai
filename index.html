@@ -5,14 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eclipse AI | Learn How To Think</title>
     
-    <!-- React & ReactDOM -->
+    <link rel="icon" id="favicon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=">
+    
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -21,14 +19,21 @@
                 extend: {
                     colors: {
                         eclipse: {
-                            bg: '#050507',
-                            surface: '#121217',
-                            border: '#2A2A35',
+                            bg: '#030305',
+                            surface: '#0A0A0F',
+                            border: '#1F1F2E',
                             accent: '#6366F1',
-                            text: '#E2E8F0',
+                            text: '#F8FAFC',
                             muted: '#94A3B8',
-                            sol: '#EAB308',
-                            luna: '#8B5CF6'
+                        }
+                    },
+                    animation: {
+                        'ai-speak': 'speak 1.5s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        speak: {
+                            '0%, 100%': { boxShadow: '0 0 0 0 rgba(99, 102, 241, 0.4)' },
+                            '50%': { boxShadow: '0 0 15px 5px rgba(99, 102, 241, 0.8)' },
                         }
                     }
                 }
@@ -36,34 +41,37 @@
         }
     </script>
 
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
         body {
-            background-color: #050507;
-            color: #E2E8F0;
+            background-color: #030305;
+            color: #F8FAFC;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
-        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #2A2A35; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #1F1F2E; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
         
         .glass {
-            background: rgba(18, 18, 23, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(10, 10, 15, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
         }
         
-        .eclipse-glow {
+        .hero-glow {
             position: absolute;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, rgba(0,0,0,0) 70%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, rgba(0,0,0,0) 60%);
             border-radius: 50%;
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
             pointer-events: none;
             z-index: -1;
         }
@@ -75,57 +83,103 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // Image Placeholders
-        const LOGO_IMG = "https://ui-avatars.com/api/?name=E+AI&background=121217&color=fff";
-        const LUNA_IMG = "https://ui-avatars.com/api/?name=L&background=8B5CF6&color=fff";
-        const SOL_IMG = "https://ui-avatars.com/api/?name=S&background=EAB308&color=000";
+        // ==========================================
+        // 1. USER IMAGE SETTINGS (CHANGE THESE!)
+        // ==========================================
+        // Put your images in the same folder as this HTML file.
+        // Change these strings to exactly match your file names (e.g., '2.jpg').
+        const LOGO_SRC = "https://ui-avatars.com/api/?name=E+AI&background=0A0A0F&color=fff"; // Change to 'your-logo.jpg'
+        const LUNA_SRC = "https://ui-avatars.com/api/?name=L&background=8B5CF6&color=fff"; // Change to 'luna-image.jpg'
+        const SOL_SRC  = "https://ui-avatars.com/api/?name=S&background=EAB308&color=000"; // Change to 'sol-image.jpg'
 
-        // Icons
+        // Set Favicon dynamically
+        document.getElementById('favicon').href = LOGO_SRC;
+
+        // ==========================================
+        // 2. ICONS COMPONENT
+        // ==========================================
         const Icon = ({ name, size = 20, className = "" }) => {
-            React.useEffect(() => { lucide.createIcons(); });
+            useEffect(() => { lucide.createIcons(); });
             return <i data-lucide={name} width={size} height={size} className={className}></i>;
         };
 
-        // Main App
+        // ==========================================
+        // 3. MAIN APP ROUTER
+        // ==========================================
         function App() {
             const [currentView, setCurrentView] = useState('home');
+            const [isLoggedIn, setIsLoggedIn] = useState(false);
+            
+            // Isolated Histories for Agents
+            const [lunaHistory, setLunaHistory] = useState([]);
+            const [solHistory, setSolHistory] = useState([]);
+            const [activeAgent, setActiveAgent] = useState('luna');
+
+            // Course Start Handler
+            const handleStartCourse = (agent, courseTitle) => {
+                setActiveAgent(agent);
+                const welcomeMessage = {
+                    role: 'ai',
+                    text: `Welcome to ${courseTitle}! Let's begin with Unit 1, Day 1. I am ready to guide you through this material step-by-step. What do you already know about this subject?`
+                };
+                
+                if (agent === 'luna') {
+                    setLunaHistory([welcomeMessage]);
+                } else {
+                    setSolHistory([welcomeMessage]);
+                }
+                setCurrentView('chat');
+            };
 
             return (
                 <div className="min-h-screen flex flex-col relative selection:bg-indigo-500/30">
-                    <div className="eclipse-glow top-[-200px] left-[-200px]"></div>
-                    <div className="eclipse-glow bottom-[-200px] right-[-200px]"></div>
+                    <div className="hero-glow"></div>
                     
-                    <Navbar currentView={currentView} setCurrentView={setCurrentView} />
+                    <Navbar 
+                        currentView={currentView} 
+                        setCurrentView={setCurrentView} 
+                        isLoggedIn={isLoggedIn}
+                        setIsLoggedIn={setIsLoggedIn}
+                    />
                     
                     <main className="flex-grow flex flex-col pt-16">
-                        {currentView === 'home' && <HomeView setCurrentView={setCurrentView} />}
-                        {currentView === 'chat' && <ChatView setCurrentView={setCurrentView} />}
-                        {currentView === 'courses' && <CoursesView />}
-                        {currentView === 'progress' && <ProgressView />}
-                        {currentView === 'pricing' && <PricingView />}
-                        {currentView === 'auth' && <AuthView setCurrentView={setCurrentView} />}
+                        {currentView === 'home' && <HomeView setCurrentView={setCurrentView} isLoggedIn={isLoggedIn} />}
+                        {currentView === 'chat' && (
+                            <ChatView 
+                                setCurrentView={setCurrentView}
+                                lunaHistory={lunaHistory} setLunaHistory={setLunaHistory}
+                                solHistory={solHistory} setSolHistory={setSolHistory}
+                                activeAgent={activeAgent} setActiveAgent={setActiveAgent}
+                            />
+                        )}
+                        {currentView === 'courses' && <CoursesView onStartCourse={handleStartCourse} />}
+                        {currentView === 'practice' && <PracticeView />}
+                        {currentView === 'auth' && <AuthView setCurrentView={setCurrentView} setIsLoggedIn={setIsLoggedIn} />}
                     </main>
                 </div>
             );
         }
 
-        // Navigation
-        function Navbar({ currentView, setCurrentView }) {
-            const navItems = ['Home', 'Chat', 'Courses', 'Progress', 'Pricing'];
+        // ==========================================
+        // 4. NAVBAR
+        // ==========================================
+        function Navbar({ currentView, setCurrentView, isLoggedIn, setIsLoggedIn }) {
+            const navItems = ['Home', 'Courses', 'Practice'];
+            if (isLoggedIn) navItems.splice(1, 0, 'Chat'); // Insert Chat if logged in
             
             return (
-                <nav className="fixed top-0 w-full glass z-50 px-6 py-4 flex justify-between items-center">
+                <nav className="fixed top-0 w-full glass z-50 px-6 py-4 flex justify-between items-center border-b border-eclipse-border">
                     <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentView('home')}>
-                        <img src={LOGO_IMG} alt="Eclipse AI" className="w-9 h-9 rounded-full border border-white/10 object-cover" />
+                        <img src={LOGO_SRC} alt="Eclipse AI" className="w-8 h-8 rounded-lg object-cover" />
                         <span className="text-xl font-bold tracking-tight text-white">Eclipse AI</span>
                     </div>
                     
-                    <div className="hidden md:flex items-center gap-6">
+                    <div className="hidden md:flex items-center gap-8 bg-black/40 px-6 py-2 rounded-full border border-white/5">
                         {navItems.map(item => (
                             <button 
                                 key={item}
                                 onClick={() => setCurrentView(item.toLowerCase())}
-                                className={`text-sm font-medium transition-colors ${currentView === item.toLowerCase() ? 'text-indigo-400' : 'text-eclipse-muted hover:text-white'}`}
+                                className={`text-sm font-medium transition-all ${currentView === item.toLowerCase() ? 'text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]' : 'text-eclipse-muted hover:text-white'}`}
                             >
                                 {item}
                             </button>
@@ -133,406 +187,411 @@
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <button onClick={() => setCurrentView('auth')} className="text-sm font-medium text-eclipse-muted hover:text-white transition-colors">Log In</button>
-                        <button onClick={() => setCurrentView('auth')} className="text-sm font-medium bg-white text-black px-5 py-2.5 rounded-full hover:bg-gray-200 transition-all shadow-lg">Sign Up</button>
+                        {isLoggedIn ? (
+                            <button onClick={() => {setIsLoggedIn(false); setCurrentView('home');}} className="text-sm font-medium text-eclipse-muted hover:text-white transition-colors">Sign Out</button>
+                        ) : (
+                            <>
+                                <button onClick={() => setCurrentView('auth')} className="text-sm font-medium text-eclipse-muted hover:text-white transition-colors">Log In</button>
+                                <button onClick={() => setCurrentView('auth')} className="text-sm font-semibold bg-white text-black px-5 py-2 rounded-full hover:bg-gray-200 transition-all">Sign Up</button>
+                            </>
+                        )}
                     </div>
                 </nav>
             );
         }
 
-        // Auth
-        function AuthView({ setCurrentView }) {
+        // ==========================================
+        // 5. AUTHENTICATION VIEW
+        // ==========================================
+        function AuthView({ setCurrentView, setIsLoggedIn }) {
             const [isLogin, setIsLogin] = useState(false);
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                // Simulate real login success
+                setIsLoggedIn(true);
+                setCurrentView('chat');
+            };
 
             return (
-                <div className="flex-grow flex items-center justify-center p-6">
-                    <div className="glass p-8 rounded-3xl w-full max-w-md border border-white/10 shadow-2xl">
-                        <div className="flex justify-center mb-6">
-                            <img src={LOGO_IMG} alt="Logo" className="w-16 h-16 rounded-full border border-white/20 shadow-lg object-cover" />
-                        </div>
-                        <h2 className="text-2xl font-bold text-center text-white mb-2">{isLogin ? 'Welcome Back' : 'Join Eclipse AI'}</h2>
-                        <p className="text-center text-eclipse-muted mb-8">{isLogin ? 'Log in to continue your learning journey.' : 'Start mastering math and science today.'}</p>
+                <div className="flex-grow flex items-center justify-center p-6 bg-eclipse-bg">
+                    <div className="glass p-10 rounded-3xl w-full max-w-md border border-white/5 shadow-2xl relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500"></div>
                         
-                        {/* FIX: Google Login now correctly routes to Chat */}
-                        <button type="button" onClick={() => setCurrentView('chat')} className="w-full flex items-center justify-center gap-3 glass py-3 rounded-xl hover:bg-white/5 transition-all mb-4 border border-white/10 font-medium">
+                        <div className="flex justify-center mb-6">
+                            <img src={LOGO_SRC} alt="Logo" className="w-16 h-16 rounded-2xl shadow-lg object-cover" />
+                        </div>
+                        <h2 className="text-3xl font-bold text-center text-white mb-2">{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
+                        <p className="text-center text-eclipse-muted mb-8 text-sm">{isLogin ? 'Enter your details to continue.' : 'Join the most advanced learning engine.'}</p>
+                        
+                        <button type="button" onClick={handleSubmit} className="w-full flex items-center justify-center gap-3 bg-white/5 py-3.5 rounded-xl hover:bg-white/10 transition-all mb-6 border border-white/10 font-medium">
                             <svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                             Continue with Google
                         </button>
 
-                        <div className="flex items-center gap-3 my-6">
-                            <hr className="flex-grow border-white/10" />
-                            <span className="text-xs text-eclipse-muted">OR</span>
-                            <hr className="flex-grow border-white/10" />
+                        <div className="flex items-center gap-3 mb-6">
+                            <hr className="flex-grow border-white/5" />
+                            <span className="text-xs text-eclipse-muted uppercase font-bold tracking-widest">or</span>
+                            <hr className="flex-grow border-white/5" />
                         </div>
 
-                        <form onSubmit={(e) => { e.preventDefault(); setCurrentView('chat'); }} className="space-y-4">
+                        <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <label className="block text-sm text-eclipse-muted mb-1">Email Address</label>
-                                <input type="email" required className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors" placeholder="student@example.com" />
+                                <input type="email" required value={email} onChange={e=>setEmail(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder-gray-600" placeholder="Email address" />
                             </div>
                             <div>
-                                <label className="block text-sm text-eclipse-muted mb-1">Password</label>
-                                <input type="password" required className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors" placeholder="••••••••" />
+                                <input type="password" required value={password} onChange={e=>setPassword(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder-gray-600" placeholder="Password" />
                             </div>
-                            <button type="submit" className="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-500 transition-all shadow-[0_0_15px_rgba(99,102,241,0.3)] mt-2">
-                                {isLogin ? 'Log In' : 'Sign Up with Email'}
+                            <button type="submit" className="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-500 transition-all shadow-[0_0_20px_rgba(99,102,241,0.2)] mt-4">
+                                {isLogin ? 'Log In' : 'Create Account'}
                             </button>
                         </form>
                         
-                        <p className="text-center text-sm text-eclipse-muted mt-6">
+                        <p className="text-center text-sm text-eclipse-muted mt-8">
                             {isLogin ? "Don't have an account? " : "Already have an account? "}
-                            <span onClick={() => setIsLogin(!isLogin)} className="text-indigo-400 cursor-pointer hover:underline">{isLogin ? 'Sign up' : 'Log in'}</span>
+                            <span onClick={() => setIsLogin(!isLogin)} className="text-indigo-400 cursor-pointer hover:text-indigo-300 font-semibold">{isLogin ? 'Sign up' : 'Log in'}</span>
                         </p>
                     </div>
                 </div>
             );
         }
 
-        // Chat View
-        function ChatView({ setCurrentView }) {
-            const [agent, setAgent] = useState('luna');
+        // ==========================================
+        // 6. CHAT VIEW
+        // ==========================================
+        function ChatView({ setCurrentView, lunaHistory, setLunaHistory, solHistory, setSolHistory, activeAgent, setActiveAgent }) {
             const [inputText, setInputText] = useState('');
             const [isTyping, setIsTyping] = useState(false);
             const chatEndRef = useRef(null);
 
-            // FIX: Real functional history state
-            const createGreeting = (a) => ({
-                role: 'ai', 
-                agent: a,
-                text: a === 'luna' 
-                    ? "Hi, I'm Luna. I specialize in mathematical reasoning. What are you studying right now?" 
-                    : "Hello, I'm Sol. I specialize in the sciences. What concepts can we explore today?"
-            });
+            // Determine which history to show based on active agent
+            const messages = activeAgent === 'luna' ? lunaHistory : solHistory;
+            const setMessages = activeAgent === 'luna' ? setLunaHistory : setSolHistory;
 
-            const [conversations, setConversations] = useState([
-                { id: 1, title: 'New Conversation', messages: [createGreeting('luna')] }
-            ]);
-            const [activeId, setActiveId] = useState(1);
+            // Initialize empty history with greeting
+            useEffect(() => {
+                if (messages.length === 0) {
+                    setMessages([{
+                        role: 'ai',
+                        text: activeAgent === 'luna' 
+                            ? "Hi, I'm Luna. Let's tackle some mathematics. What topic are we diving into today?"
+                            : "Hello, I'm Sol. I'm ready to explore the sciences with you. Where should we begin?"
+                    }]);
+                }
+            }, [activeAgent, messages, setMessages]);
 
-            const activeConversation = conversations.find(c => c.id === activeId) || conversations[0];
-            const messages = activeConversation.messages;
+            // Auto-scroll robustly
+            useEffect(() => {
+                chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, [messages, isTyping]);
 
-            // Auto-scroll
-            useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, isTyping]);
-
-            // Handle New Conversation
-            const startNewConversation = () => {
-                const newId = Date.now();
-                setConversations([{ id: newId, title: 'New Conversation', messages: [createGreeting(agent)] }, ...conversations]);
-                setActiveId(newId);
-            };
-
-            // Switch Agents
-            const handleAgentSwitch = (newAgent) => {
-                if (agent === newAgent) return;
-                setAgent(newAgent);
-                updateCurrentConversation([
-                    ...messages,
-                    { role: 'system', text: `Switched to ${newAgent === 'luna' ? 'Luna (Math Engine)' : 'Sol (Science Engine)'}` },
-                    createGreeting(newAgent)
-                ]);
-            };
-
-            const updateCurrentConversation = (newMessages, newTitle = null) => {
-                setConversations(prev => prev.map(c => {
-                    if (c.id === activeId) {
-                        return { ...c, messages: newMessages, title: newTitle || c.title };
-                    }
-                    return c;
-                }));
-            };
-
-            // Handle Submission
             const handleSubmit = (e) => {
                 e.preventDefault();
                 if (!inputText.trim()) return;
 
-                const userText = inputText;
-                const updatedMessages = [...messages, { role: 'user', text: userText }];
-                
-                // Set title if it's the first user message
-                const newTitle = messages.length <= 2 ? userText.slice(0, 25) + "..." : activeConversation.title;
-                
-                updateCurrentConversation(updatedMessages, newTitle);
+                const userMsg = { role: 'user', text: inputText };
+                setMessages([...messages, userMsg]);
                 setInputText('');
                 setIsTyping(true);
 
-                // Simulate AI
+                // Simulate highly compliant AI
                 setTimeout(() => {
-                    let aiReply = agent === 'luna' 
-                        ? "That's an interesting mathematical approach. Before we jump to the formula, let's break down the variables. What is your first step?" 
-                        : "Great question. In scientific terms, we must consider the initial state of the system. How does energy transfer apply here?";
-                    
-                    updateCurrentConversation([...updatedMessages, { role: 'ai', agent: agent, text: aiReply }], newTitle);
+                    const aiReply = {
+                        role: 'ai',
+                        text: `Absolutely, I can help you with that right now. Here is the step-by-step breakdown to ensure you understand it perfectly...`
+                    };
+                    setMessages(prev => [...prev, aiReply]);
                     setIsTyping(false);
                 }, 1500);
             };
 
+            const clearCurrentChat = () => {
+                setMessages([]);
+            };
+
+            const currentAgentImage = activeAgent === 'luna' ? LUNA_SRC : SOL_SRC;
+
             return (
-                <div className="flex flex-grow h-[calc(100vh-64px)] overflow-hidden">
-                    {/* Sidebar */}
-                    <div className="w-64 glass hidden md:flex flex-col border-r border-eclipse-border relative">
+                <div className="flex flex-grow h-[calc(100vh-64px)] overflow-hidden bg-eclipse-bg">
+                    {/* Enhanced Sidebar */}
+                    <div className="w-72 glass hidden md:flex flex-col border-r border-eclipse-border z-10">
+                        {/* Agent Switcher - Complete Tab Isolation */}
                         <div className="p-4 border-b border-white/5">
-                            <button onClick={startNewConversation} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-white transition-colors text-sm font-bold shadow-lg">
-                                <Icon name="plus" size={16} /> New Conversation
-                            </button>
-                        </div>
-                        
-                        {/* FIX: Agent Switcher added to sidebar */}
-                        <div className="px-4 mt-4 mb-2">
-                            <p className="text-xs font-semibold text-eclipse-muted mb-2 uppercase tracking-wider">Active Agent</p>
-                            <div className="flex bg-black/60 p-1 rounded-xl border border-white/5 shadow-inner">
+                            <p className="text-[10px] font-bold text-eclipse-muted mb-3 uppercase tracking-widest px-1">AI Engine</p>
+                            <div className="flex bg-black/50 p-1.5 rounded-xl border border-white/5">
                                 <button 
-                                    onClick={() => handleAgentSwitch('luna')} 
-                                    className={`flex-1 py-1.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${agent === 'luna' ? 'bg-[#8B5CF6] text-white shadow-lg' : 'text-eclipse-muted hover:text-white'}`}
+                                    onClick={() => setActiveAgent('luna')} 
+                                    className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${activeAgent === 'luna' ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg' : 'text-eclipse-muted hover:text-white hover:bg-white/5'}`}
                                 >
-                                    <img src={LUNA_IMG} className="w-4 h-4 rounded-full" /> Luna
+                                    <img src={LUNA_SRC} className="w-5 h-5 rounded-full object-cover" /> Luna
                                 </button>
                                 <button 
-                                    onClick={() => handleAgentSwitch('sol')} 
-                                    className={`flex-1 py-1.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${agent === 'sol' ? 'bg-[#EAB308] text-black shadow-lg' : 'text-eclipse-muted hover:text-white'}`}
+                                    onClick={() => setActiveAgent('sol')} 
+                                    className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${activeAgent === 'sol' ? 'bg-gradient-to-r from-yellow-600 to-orange-600 text-white shadow-lg' : 'text-eclipse-muted hover:text-white hover:bg-white/5'}`}
                                 >
-                                    <img src={SOL_IMG} className="w-4 h-4 rounded-full" /> Sol
+                                    <img src={SOL_SRC} className="w-5 h-5 rounded-full object-cover" /> Sol
                                 </button>
                             </div>
                         </div>
 
-                        {/* FIX: Functional History */}
-                        <div className="flex-grow overflow-y-auto px-3 pb-24">
-                            <div className="text-xs font-semibold text-eclipse-muted mb-2 px-2 mt-4 uppercase tracking-wider">History</div>
-                            {conversations.map(conv => (
-                                <div 
-                                    key={conv.id} 
-                                    onClick={() => setActiveId(conv.id)}
-                                    className={`truncate px-3 py-2 text-sm rounded-lg cursor-pointer transition-colors mb-1 ${activeId === conv.id ? 'bg-indigo-500/20 text-indigo-300' : 'text-eclipse-muted hover:bg-white/5 hover:text-white'}`}
-                                >
-                                    {conv.title}
-                                </div>
-                            ))}
-                        </div>
+                        {/* Navigation Buttons */}
+                        <div className="flex-grow p-4 space-y-2 overflow-y-auto">
+                            <p className="text-[10px] font-bold text-eclipse-muted mb-3 uppercase tracking-widest px-1 mt-2">Workspace</p>
+                            
+                            <button onClick={clearCurrentChat} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-white bg-white/5 hover:bg-white/10 transition-colors border border-white/5">
+                                <Icon name="plus-circle" size={18} className="text-indigo-400" /> New Chat
+                            </button>
+                            
+                            <button onClick={() => setCurrentView('courses')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-eclipse-muted hover:text-white hover:bg-white/5 transition-colors">
+                                <Icon name="book-open" size={18} /> View Courses
+                            </button>
 
-                        {/* FIX: Added Upgrade Button to Sidebar */}
-                        <div className="absolute bottom-0 w-full p-4 border-t border-white/5 bg-eclipse-surface/80 backdrop-blur">
-                            <button onClick={() => setCurrentView('pricing')} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 glass border-indigo-500/30 hover:bg-indigo-500/10 rounded-xl text-indigo-300 transition-colors text-sm font-bold">
-                                <Icon name="zap" size={16} /> Upgrade to Pro
+                            <button onClick={() => setCurrentView('practice')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-eclipse-muted hover:text-white hover:bg-white/5 transition-colors">
+                                <Icon name="pen-tool" size={18} /> Practice Problems
+                            </button>
+                            
+                            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-eclipse-muted hover:text-white hover:bg-white/5 transition-colors">
+                                <Icon name="settings" size={18} /> Settings
                             </button>
                         </div>
                     </div>
 
                     {/* Main Chat Area */}
-                    <div className="flex-grow flex flex-col relative bg-eclipse-surface">
-                        <div className="flex-grow overflow-y-auto p-6 pt-10 pb-32">
-                            <div className="max-w-3xl mx-auto space-y-8">
+                    <div className="flex-grow flex flex-col relative">
+                        <div className="flex-grow overflow-y-auto p-6 pt-8 pb-32">
+                            <div className="max-w-4xl mx-auto space-y-8">
                                 {messages.map((msg, idx) => {
-                                    if (msg.role === 'system') {
-                                        return (
-                                            <div key={idx} className="flex justify-center">
-                                                <span className="text-xs bg-white/5 text-eclipse-muted px-3 py-1 rounded-full border border-white/10">{msg.text}</span>
-                                            </div>
-                                        );
-                                    }
                                     const isUser = msg.role === 'user';
-                                    const agentImage = msg.agent === 'luna' ? LUNA_IMG : SOL_IMG;
-                                    const agentName = msg.agent === 'luna' ? 'Luna' : 'Sol';
-
                                     return (
-                                        <div key={idx} className="flex gap-4">
-                                            {isUser ? (
-                                                <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0 text-white font-bold text-xs">U</div>
-                                            ) : (
-                                                <img src={agentImage} className="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-white/10 shadow-lg" alt={agentName} />
-                                            )}
+                                        <div key={idx} className={`flex gap-5 ${isUser ? 'flex-row-reverse' : ''}`}>
+                                            {/* Avatar */}
+                                            <div className="flex-shrink-0">
+                                                {isUser ? (
+                                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white font-bold text-sm border border-white/10 shadow-lg">U</div>
+                                                ) : (
+                                                    <img src={currentAgentImage} className="w-10 h-10 rounded-xl object-cover border border-white/10 shadow-lg" alt="AI" />
+                                                )}
+                                            </div>
                                             
-                                            <div className="flex-grow">
-                                                <p className="font-semibold text-white mb-1">{isUser ? 'You' : agentName}</p>
-                                                <p className="text-eclipse-text leading-relaxed">{msg.text}</p>
+                                            {/* Message Bubble */}
+                                            <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} max-w-[80%]`}>
+                                                <p className="text-xs text-eclipse-muted mb-1 px-1">{isUser ? 'You' : (activeAgent === 'luna' ? 'Luna' : 'Sol')}</p>
+                                                <div className={`p-4 rounded-2xl ${isUser ? 'bg-indigo-600 text-white rounded-tr-sm' : 'glass border-white/5 text-eclipse-text rounded-tl-sm'}`}>
+                                                    <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                                                </div>
                                             </div>
                                         </div>
                                     )
                                 })}
 
+                                {/* Typing Animation */}
                                 {isTyping && (
-                                    <div className="flex gap-4 opacity-70">
-                                        <img src={agent === 'luna' ? LUNA_IMG : SOL_IMG} className="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-white/10" alt="typing" />
-                                        <div className="flex items-center gap-1">
-                                            <div className="w-2 h-2 bg-eclipse-muted rounded-full animate-bounce"></div>
-                                            <div className="w-2 h-2 bg-eclipse-muted rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                                            <div className="w-2 h-2 bg-eclipse-muted rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></div>
+                                    <div className="flex gap-5">
+                                        <div className="flex-shrink-0">
+                                            <img src={currentAgentImage} className="w-10 h-10 rounded-xl object-cover border-2 border-indigo-500 animate-ai-speak" alt="AI Typing" />
+                                        </div>
+                                        <div className="flex flex-col items-start">
+                                            <p className="text-xs text-eclipse-muted mb-1 px-1">{activeAgent === 'luna' ? 'Luna' : 'Sol'} is thinking...</p>
+                                            <div className="p-4 rounded-2xl glass border-white/5 rounded-tl-sm flex items-center gap-2 h-[56px]">
+                                                <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"></div>
+                                                <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                                                <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></div>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
-                                <div ref={chatEndRef} />
+                                <div ref={chatEndRef} className="h-4" />
                             </div>
                         </div>
 
-                        <div className="absolute bottom-0 w-full bg-gradient-to-t from-eclipse-surface via-eclipse-surface to-transparent pt-10 pb-6 px-6">
-                            <form onSubmit={handleSubmit} className="max-w-3xl mx-auto relative">
+                        {/* Input Area */}
+                        <div className="absolute bottom-0 w-full bg-gradient-to-t from-eclipse-bg via-eclipse-bg to-transparent pt-12 pb-8 px-6">
+                            <form onSubmit={handleSubmit} className="max-w-4xl mx-auto relative group">
                                 <input 
                                     type="text" 
                                     value={inputText}
                                     onChange={(e) => setInputText(e.target.value)}
-                                    placeholder={`Message ${agent === 'luna' ? 'Luna (Math)' : 'Sol (Science)'}...`} 
-                                    className="w-full bg-black/80 border border-white/10 rounded-2xl py-4 pl-4 pr-14 text-white focus:outline-none focus:border-indigo-500 shadow-lg backdrop-blur-md transition-all"
+                                    placeholder={`Ask ${activeAgent === 'luna' ? 'Luna' : 'Sol'} anything...`} 
+                                    className="w-full bg-black/60 border border-white/10 group-hover:border-white/20 rounded-2xl py-4 pl-6 pr-16 text-white focus:outline-none focus:border-indigo-500 shadow-xl backdrop-blur-xl transition-all"
                                 />
-                                <button type="submit" disabled={!inputText.trim()} className="absolute right-3 top-3 w-8 h-8 bg-white disabled:bg-white/20 text-black rounded-xl flex items-center justify-center transition-colors">
-                                    <Icon name="arrow-up" size={18} />
+                                <button type="submit" disabled={!inputText.trim()} className="absolute right-3 top-3 bottom-3 aspect-square bg-indigo-600 disabled:bg-white/10 text-white disabled:text-white/30 rounded-xl flex items-center justify-center transition-all hover:bg-indigo-500">
+                                    <Icon name="send" size={18} />
                                 </button>
                             </form>
+                            <p className="text-center text-[10px] text-eclipse-muted mt-3">AI agents are programmed to be relentlessly helpful. Verify complex calculations.</p>
                         </div>
                     </div>
                 </div>
             );
         }
 
-        // Courses View
-        function CoursesView() {
-            // FIX: Added comprehensive High School courses, divided by Math/Science
+        // ==========================================
+        // 7. COURSES VIEW
+        // ==========================================
+        function CoursesView({ onStartCourse }) {
             const mathCourses = [
-                { title: "Algebra 1", desc: "Linear equations, inequalities, and functions.", diff: "Beginner" },
-                { title: "Geometry", desc: "Proofs, theorems, and spatial reasoning.", diff: "Beginner" },
-                { title: "Algebra 2", desc: "Polynomials, complex numbers, and logarithms.", diff: "Intermediate" },
-                { title: "Precalculus", desc: "Trigonometry, vectors, and limits.", diff: "Intermediate" },
-                { title: "AP Calculus AB", desc: "Derivatives and basic integration.", diff: "Advanced" },
-                { title: "AP Calculus BC", desc: "Advanced integration, sequences, and series.", diff: "Advanced" },
-                { title: "AP Statistics", desc: "Data analysis, probability, and inference.", diff: "Advanced" }
+                { title: "Algebra 1", desc: "Linear equations, inequalities.", diff: "Beginner" },
+                { title: "AP Calculus AB", desc: "Derivatives and integration.", diff: "Advanced" },
             ];
 
             const scienceCourses = [
-                { title: "Earth Science", desc: "Geology, meteorology, and astronomy.", diff: "Beginner" },
-                { title: "Biology", desc: "Cells, genetics, and ecology.", diff: "Beginner" },
-                { title: "Chemistry", desc: "Atomic structure, reactions, and stoichiometry.", diff: "Intermediate" },
-                { title: "Physics", desc: "Kinematics, forces, and energy.", diff: "Intermediate" },
-                { title: "AP Biology", desc: "Advanced evolution and cellular processes.", diff: "Advanced" },
-                { title: "AP Chemistry", desc: "Thermodynamics, kinetics, and equilibrium.", diff: "Advanced" },
-                { title: "AP Physics 1 & 2", desc: "Algebra-based mechanics, electricity & magnetism.", diff: "Advanced" },
-                { title: "AP Physics C", desc: "Calculus-based mechanics and E&M.", diff: "Advanced" }
+                { title: "Biology", desc: "Cells, genetics, ecology.", diff: "Beginner" },
+                { title: "AP Physics C", desc: "Calculus-based mechanics.", diff: "Advanced" }
             ];
 
-            const renderCourseCard = (course, i) => (
-                <div key={i} className="glass rounded-2xl p-6 flex flex-col border border-white/5 hover:border-indigo-500/30">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="text-xs font-semibold px-2 py-1 rounded bg-indigo-500/20 text-indigo-400">{course.diff}</div>
-                    </div>
-                    <h3 className="text-xl font-bold mb-2">{course.title}</h3>
-                    <p className="text-sm text-eclipse-muted mb-6 flex-grow">{course.desc}</p>
-                    <button className="w-full py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700">Start Course</button>
-                </div>
-            );
-
             return (
-                <div className="max-w-6xl mx-auto w-full p-6 pt-10 pb-20">
-                    <h2 className="text-4xl font-bold mb-2">Curriculum</h2>
-                    <p className="text-eclipse-muted mb-12">Comprehensive high school paths tailored to your level.</p>
+                <div className="max-w-6xl mx-auto w-full p-6 pt-12 pb-24">
+                    <h2 className="text-4xl font-bold mb-3">Curriculum</h2>
+                    <p className="text-eclipse-muted mb-12 text-lg">Select a course. Your specialized AI will automatically load Unit 1, Day 1.</p>
                     
                     <div className="mb-16">
-                        <h3 className="text-2xl font-bold mb-6 flex items-center gap-3 text-luna">
-                            <Icon name="calculator" /> Mathematics (Luna)
+                        <h3 className="text-2xl font-bold mb-6 flex items-center gap-3 text-purple-400">
+                            <Icon name="calculator" /> Mathematics (Luna Engine)
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {mathCourses.map(renderCourseCard)}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {mathCourses.map((c, i) => (
+                                <div key={i} className="glass rounded-2xl p-6 flex flex-col border border-white/5 hover:border-purple-500/30 transition-all hover:-translate-y-1">
+                                    <div className="text-[10px] font-bold px-2 py-1 rounded bg-purple-500/20 text-purple-300 w-max mb-4 uppercase">{c.diff}</div>
+                                    <h3 className="text-xl font-bold mb-2">{c.title}</h3>
+                                    <p className="text-sm text-eclipse-muted mb-8 flex-grow">{c.desc}</p>
+                                    <button onClick={() => onStartCourse('luna', c.title)} className="w-full py-3 rounded-xl text-sm font-bold bg-white/5 hover:bg-purple-600 text-white transition-colors border border-white/10 hover:border-transparent">Start Course</button>
+                                </div>
+                            ))}
                         </div>
                     </div>
 
                     <div>
-                        <h3 className="text-2xl font-bold mb-6 flex items-center gap-3 text-sol">
-                            <Icon name="microscope" /> Sciences (Sol)
+                        <h3 className="text-2xl font-bold mb-6 flex items-center gap-3 text-yellow-400">
+                            <Icon name="microscope" /> Sciences (Sol Engine)
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {scienceCourses.map(renderCourseCard)}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {scienceCourses.map((c, i) => (
+                                <div key={i} className="glass rounded-2xl p-6 flex flex-col border border-white/5 hover:border-yellow-500/30 transition-all hover:-translate-y-1">
+                                    <div className="text-[10px] font-bold px-2 py-1 rounded bg-yellow-500/20 text-yellow-300 w-max mb-4 uppercase">{c.diff}</div>
+                                    <h3 className="text-xl font-bold mb-2">{c.title}</h3>
+                                    <p className="text-sm text-eclipse-muted mb-8 flex-grow">{c.desc}</p>
+                                    <button onClick={() => onStartCourse('sol', c.title)} className="w-full py-3 rounded-xl text-sm font-bold bg-white/5 hover:bg-yellow-600 text-white transition-colors border border-white/10 hover:border-transparent">Start Course</button>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
             );
         }
 
-        // Home View
-        function HomeView({ setCurrentView }) {
+        // ==========================================
+        // 8. PRACTICE VIEW (NEW)
+        // ==========================================
+        function PracticeView() {
+            const [selected, setSelected] = useState(null);
+            const [submitted, setSubmitted] = useState(false);
+
+            const checkAnswer = () => {
+                setSubmitted(true);
+            };
+
             return (
-                <div className="flex-grow flex flex-col items-center justify-center px-6 pb-20 text-center mt-20">
-                    <div className="max-w-4xl mx-auto">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm mb-8">
-                            <Icon name="sparkles" size={14} />
-                            <span>Introducing Advanced Reasoning Engine v2.0</span>
+                <div className="max-w-3xl mx-auto w-full p-6 pt-12">
+                    <div className="flex items-center justify-between mb-8">
+                        <h2 className="text-3xl font-bold">Daily Practice</h2>
+                        <span className="px-3 py-1 bg-indigo-500/20 text-indigo-400 rounded-full text-xs font-bold border border-indigo-500/30">AP Calculus AB</span>
+                    </div>
+
+                    <div className="glass p-8 rounded-3xl border border-white/5">
+                        <p className="text-sm text-eclipse-muted mb-4 font-semibold uppercase tracking-widest">Question 1</p>
+                        <p className="text-xl font-medium mb-8">What is the derivative of f(x) = 3x² + 2x?</p>
+
+                        <div className="space-y-3 mb-8">
+                            {['6x + 2', '3x + 2', '6x', 'x² + x'].map((ans, idx) => {
+                                const isCorrect = idx === 0;
+                                let btnClass = "w-full text-left px-6 py-4 rounded-xl border transition-all font-medium text-lg ";
+                                
+                                if (!submitted) {
+                                    btnClass += selected === idx ? "border-indigo-500 bg-indigo-500/10" : "border-white/10 bg-black/40 hover:bg-white/5";
+                                } else {
+                                    if (isCorrect) btnClass += "border-green-500 bg-green-500/20 text-green-300";
+                                    else if (selected === idx) btnClass += "border-red-500 bg-red-500/20 text-red-300";
+                                    else btnClass += "border-white/5 bg-black/40 opacity-50";
+                                }
+
+                                return (
+                                    <button 
+                                        key={idx} 
+                                        onClick={() => !submitted && setSelected(idx)}
+                                        className={btnClass}
+                                        disabled={submitted}
+                                    >
+                                        {ans}
+                                    </button>
+                                );
+                            })}
                         </div>
-                        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500">
-                            Learn how to think,<br/>not what to memorize.
+
+                        {submitted && (
+                            <div className={`p-4 rounded-xl mb-6 ${selected === 0 ? 'bg-green-500/10 text-green-200' : 'bg-red-500/10 text-red-200'}`}>
+                                {selected === 0 ? "Correct! Power rule: d/dx(3x²) = 6x, d/dx(2x) = 2." : "Incorrect. Remember to apply the power rule to both terms."}
+                            </div>
+                        )}
+
+                        <button 
+                            onClick={checkAnswer} 
+                            disabled={selected === null || submitted}
+                            className="w-full py-4 bg-indigo-600 disabled:bg-white/10 text-white font-bold rounded-xl hover:bg-indigo-500 transition-colors"
+                        >
+                            {submitted ? 'Next Question' : 'Check Answer'}
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        // ==========================================
+        // 9. HOME VIEW (BEAUTIFIED)
+        // ==========================================
+        function HomeView({ setCurrentView, isLoggedIn }) {
+            return (
+                <div className="flex-grow flex flex-col items-center justify-center px-6 pb-20 text-center mt-12 relative">
+                    <div className="max-w-5xl mx-auto relative z-10">
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-eclipse-muted text-sm mb-8 backdrop-blur-md">
+                            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                            Systems Operational - Version 3.0
+                        </div>
+                        <h1 className="text-6xl md:text-8xl font-extrabold tracking-tighter mb-6 text-transparent bg-clip-text bg-gradient-to-br from-white via-gray-200 to-gray-600 drop-shadow-sm">
+                            Master the complex.
                         </h1>
-                        <p className="text-lg md:text-xl text-eclipse-muted mb-10 max-w-2xl mx-auto leading-relaxed">
-                            Eclipse AI is your personalized tutor, adaptive learning platform, and reasoning engine for mathematics and science.
+                        <p className="text-lg md:text-xl text-eclipse-muted mb-12 max-w-2xl mx-auto leading-relaxed">
+                            Eclipse AI is an uncompromising reasoning engine designed to force you to think, adapt, and conquer high-level mathematics and science.
                         </p>
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
-                            <button onClick={() => setCurrentView('chat')} className="w-full sm:w-auto px-8 py-4 rounded-full bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)] flex items-center justify-center gap-2">
-                                Start Learning Free <Icon name="arrow-right" size={18} />
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-5 mb-24">
+                            <button onClick={() => setCurrentView(isLoggedIn ? 'chat' : 'auth')} className="w-full sm:w-auto px-8 py-4 rounded-xl bg-white text-black font-bold hover:bg-gray-200 transition-all flex items-center justify-center gap-2 text-lg">
+                                {isLoggedIn ? 'Open Workspace' : 'Start Learning Free'} <Icon name="arrow-right" size={20} />
                             </button>
-                            <button onClick={() => setCurrentView('courses')} className="w-full sm:w-auto px-8 py-4 rounded-full glass text-white font-semibold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
-                                <Icon name="book-open" size={18} /> Explore Courses
+                            <button onClick={() => setCurrentView('courses')} className="w-full sm:w-auto px-8 py-4 rounded-xl glass text-white font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-lg">
+                                <Icon name="grid" size={20} /> Browse Curriculum
                             </button>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto w-full">
-                        <FeatureCard icon="brain" title="Socratic Tutoring" desc="AI that teaches by asking the right questions, guiding you to the answer naturally." />
-                        <FeatureCard icon="network" title="Concept Mapping" desc="Visualize how algorithms, formulas, and scientific laws connect to one another." />
-                        <FeatureCard icon="target" title="Adaptive Practice" desc="Problems dynamically adjust to your skill level, ensuring you are always challenged." />
-                    </div>
-                </div>
-            );
-        }
-
-        function FeatureCard({ icon, title, desc }) {
-            return (
-                <div className="glass p-6 rounded-2xl text-left hover:-translate-y-1 transition-transform cursor-pointer border border-white/5 hover:border-indigo-500/30">
-                    <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 mb-4">
-                        <Icon name={icon} size={24} />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2">{title}</h3>
-                    <p className="text-eclipse-muted text-sm leading-relaxed">{desc}</p>
-                </div>
-            );
-        }
-
-        // Progress View
-        function ProgressView() {
-            return (
-                <div className="max-w-6xl mx-auto w-full p-6 pt-10">
-                    <h2 className="text-3xl font-bold mb-8">Progress Dashboard</h2>
-                    <div className="glass rounded-2xl p-8 border border-white/5 text-center text-eclipse-muted">
-                        Progress tracking will populate as you complete courses and solve problems with Sol and Luna.
-                    </div>
-                </div>
-            );
-        }
-
-        // Pricing View
-        function PricingView() {
-            return (
-                <div className="max-w-4xl mx-auto w-full p-6 pt-10 text-center pb-20">
-                    <h2 className="text-4xl font-bold mb-4">Unlock Your Full Potential</h2>
-                    <p className="text-eclipse-muted mb-12">Choose the plan that fits your academic goals.</p>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="glass rounded-3xl p-8 border border-white/5 flex flex-col text-left">
-                            <h3 className="text-2xl font-bold mb-2">Basic</h3>
-                            <p className="text-eclipse-muted text-sm mb-6">For casual learners.</p>
-                            <div className="text-4xl font-bold mb-6">$0<span className="text-lg font-normal text-eclipse-muted">/mo</span></div>
-                            <ul className="space-y-4 mb-8 flex-grow text-sm">
-                                <li className="flex items-center gap-3"><Icon name="check" size={16} className="text-green-400" /> Limited daily AI chats</li>
-                                <li className="flex items-center gap-3"><Icon name="check" size={16} className="text-green-400" /> Basic interactive courses</li>
-                            </ul>
-                            <button className="w-full py-3 rounded-xl border border-white/10 text-white font-semibold hover:bg-white/5 transition-colors">Current Plan</button>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto w-full">
+                        <div className="glass p-8 rounded-3xl text-left border border-white/5 relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <Icon name="brain-circuit" size={32} className="text-purple-400 mb-6" />
+                            <h3 className="text-2xl font-bold mb-3">Relentless AI</h3>
+                            <p className="text-eclipse-muted text-sm leading-relaxed">Agents that do not just give answers, but guide you through the raw mechanics of the problem.</p>
                         </div>
-
-                        <div className="glass rounded-3xl p-8 border border-indigo-500/50 bg-indigo-900/10 flex flex-col text-left relative overflow-hidden">
-                            <div className="absolute top-0 right-0 bg-indigo-600 text-xs font-bold px-3 py-1 rounded-bl-lg">POPULAR</div>
-                            <h3 className="text-2xl font-bold mb-2 text-indigo-400">Pro</h3>
-                            <p className="text-eclipse-muted text-sm mb-6">For dedicated students & exam prep.</p>
-                            <div className="text-4xl font-bold mb-6">$19<span className="text-lg font-normal text-eclipse-muted">/mo</span></div>
-                            <ul className="space-y-4 mb-8 flex-grow text-sm">
-                                <li className="flex items-center gap-3"><Icon name="check" size={16} className="text-indigo-400" /> Unlimited AI chats & API access</li>
-                                <li className="flex items-center gap-3"><Icon name="check" size={16} className="text-indigo-400" /> Full course & mastery access</li>
-                                <li className="flex items-center gap-3"><Icon name="check" size={16} className="text-indigo-400" /> Advanced analytics & study plans</li>
-                            </ul>
-                            <button className="w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-500 transition-colors shadow-[0_0_15px_rgba(99,102,241,0.4)]">Upgrade to Pro</button>
+                        <div className="glass p-8 rounded-3xl text-left border border-white/5 relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <Icon name="cpu" size={32} className="text-indigo-400 mb-6" />
+                            <h3 className="text-2xl font-bold mb-3">Isolated Engines</h3>
+                            <p className="text-eclipse-muted text-sm leading-relaxed">Luna handles pure logic and math. Sol handles physics and natural sciences. Zero context bleed.</p>
+                        </div>
+                        <div className="glass p-8 rounded-3xl text-left border border-white/5 relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <Icon name="target" size={32} className="text-emerald-400 mb-6" />
+                            <h3 className="text-2xl font-bold mb-3">Active Practice</h3>
+                            <p className="text-eclipse-muted text-sm leading-relaxed">Apply what you learn immediately with in-browser practice environments tailored to your course.</p>
                         </div>
                     </div>
                 </div>
