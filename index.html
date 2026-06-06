@@ -5,14 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eclipse AI | Learn How To Think</title>
     
-    <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -27,7 +24,9 @@
                             accent: '#6366F1',
                             accentGlow: 'rgba(99, 102, 241, 0.15)',
                             text: '#E2E8F0',
-                            muted: '#94A3B8'
+                            muted: '#94A3B8',
+                            sol: '#EAB308',
+                            luna: '#8B5CF6'
                         }
                     },
                     animation: {
@@ -38,7 +37,6 @@
         }
     </script>
 
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
@@ -76,9 +74,9 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef } = React;
 
-        // --- Icons (Mapping Lucide Icons to functional components for ease) ---
+        // --- Icons ---
         const Icon = ({ name, size = 20, className = "" }) => {
             React.useEffect(() => {
                 lucide.createIcons();
@@ -103,6 +101,7 @@
                         {currentView === 'courses' && <CoursesView />}
                         {currentView === 'progress' && <ProgressView />}
                         {currentView === 'pricing' && <PricingView />}
+                        {currentView === 'auth' && <AuthView setCurrentView={setCurrentView} />}
                     </main>
                 </div>
             );
@@ -110,14 +109,13 @@
 
         // --- Navigation Bar ---
         function Navbar({ currentView, setCurrentView }) {
-            const navItems = ['Home', 'Chat', 'Courses', 'Practice', 'Progress', 'Pricing'];
+            const navItems = ['Home', 'Chat', 'Courses', 'Progress', 'Pricing'];
             
             return (
                 <nav className="fixed top-0 w-full glass z-50 px-6 py-4 flex justify-between items-center">
+                    {/* Main Eclipse Logo */}
                     <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentView('home')}>
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-400 flex items-center justify-center shadow-[0_0_15px_rgba(99,102,241,0.5)]">
-                            <div className="w-6 h-6 rounded-full bg-eclipse-bg"></div>
-                        </div>
+                        <img src="2.jpg" alt="Eclipse AI" className="w-9 h-9 rounded-full border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.1)] object-cover" />
                         <span className="text-xl font-bold tracking-tight text-white">Eclipse AI</span>
                     </div>
                     
@@ -134,14 +132,253 @@
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <button className="text-sm font-medium text-eclipse-muted hover:text-white transition-colors">Log In</button>
-                        <button className="text-sm font-medium bg-white text-black px-4 py-2 rounded-full hover:bg-gray-200 transition-all">Sign Up</button>
+                        <button onClick={() => setCurrentView('auth')} className="text-sm font-medium text-eclipse-muted hover:text-white transition-colors">Log In</button>
+                        <button onClick={() => setCurrentView('auth')} className="text-sm font-medium bg-white text-black px-5 py-2.5 rounded-full hover:bg-gray-200 transition-all shadow-lg">Sign Up</button>
                     </div>
                 </nav>
             );
         }
 
-        // --- Home View ---
+        // --- Auth View (Sign Up / Login) ---
+        function AuthView({ setCurrentView }) {
+            const [isLogin, setIsLogin] = useState(false);
+
+            return (
+                <div className="flex-grow flex items-center justify-center p-6">
+                    <div className="glass p-8 rounded-3xl w-full max-w-md border border-white/10 shadow-2xl">
+                        <div className="flex justify-center mb-6">
+                            <img src="2.jpg" alt="Logo" className="w-16 h-16 rounded-full border border-white/20 shadow-lg object-cover" />
+                        </div>
+                        <h2 className="text-2xl font-bold text-center text-white mb-2">{isLogin ? 'Welcome Back' : 'Join Eclipse AI'}</h2>
+                        <p className="text-center text-eclipse-muted mb-8">{isLogin ? 'Log in to continue your learning journey.' : 'Start mastering math and science today.'}</p>
+                        
+                        <button className="w-full flex items-center justify-center gap-3 glass py-3 rounded-xl hover:bg-white/5 transition-all mb-4 border border-white/10 font-medium">
+                            <svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                            Continue with Google
+                        </button>
+
+                        <div className="flex items-center gap-3 my-6">
+                            <hr className="flex-grow border-white/10" />
+                            <span className="text-xs text-eclipse-muted">OR</span>
+                            <hr className="flex-grow border-white/10" />
+                        </div>
+
+                        <form onSubmit={(e) => { e.preventDefault(); setCurrentView('chat'); }} className="space-y-4">
+                            <div>
+                                <label className="block text-sm text-eclipse-muted mb-1">Email Address</label>
+                                <input type="email" required className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors" placeholder="student@example.com" />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-eclipse-muted mb-1">Password</label>
+                                <input type="password" required className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors" placeholder="••••••••" />
+                            </div>
+                            <button type="submit" className="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-500 transition-all shadow-[0_0_15px_rgba(99,102,241,0.3)] mt-2">
+                                {isLogin ? 'Log In' : 'Sign Up with Email'}
+                            </button>
+                        </form>
+                        
+                        <p className="text-center text-sm text-eclipse-muted mt-6">
+                            {isLogin ? "Don't have an account? " : "Already have an account? "}
+                            <span onClick={() => setIsLogin(!isLogin)} className="text-indigo-400 cursor-pointer hover:underline">{isLogin ? 'Sign up' : 'Log in'}</span>
+                        </p>
+                    </div>
+                </div>
+            );
+        }
+
+        // --- Chat Interface ---
+        function ChatView() {
+            const [agent, setAgent] = useState('luna'); // 'luna' or 'sol'
+            const [inputText, setInputText] = useState('');
+            const [isTyping, setIsTyping] = useState(false);
+            const chatEndRef = useRef(null);
+
+            // Initial messages
+            const [messages, setMessages] = useState([
+                { 
+                    role: 'ai', 
+                    agent: 'luna',
+                    text: "Hi, I'm Luna. I specialize in mathematical reasoning, algebra, calculus, and logic. Let's work through some problems step-by-step. What are you studying right now?" 
+                }
+            ]);
+
+            // Scroll to bottom when messages update
+            useEffect(() => {
+                chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, [messages, isTyping]);
+
+            // Handle switching agents
+            const handleAgentSwitch = (newAgent) => {
+                setAgent(newAgent);
+                setMessages(prev => [
+                    ...prev,
+                    { 
+                        role: 'system', 
+                        text: `Switched to ${newAgent === 'luna' ? 'Luna (Math Engine)' : 'Sol (Science Engine)'}` 
+                    },
+                    {
+                        role: 'ai',
+                        agent: newAgent,
+                        text: newAgent === 'luna' 
+                            ? "Luna here. Ready to tackle some math?" 
+                            : "Hello, I'm Sol. I specialize in biology, chemistry, and physics. What scientific concepts can we explore today?"
+                    }
+                ]);
+            };
+
+            // Simulate AI response logic
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (!inputText.trim()) return;
+
+                const userText = inputText;
+                setMessages(prev => [...prev, { role: 'user', text: userText }]);
+                setInputText('');
+                setIsTyping(true);
+
+                // Mock API Delay
+                setTimeout(() => {
+                    let aiReply = "";
+                    if (agent === 'luna') {
+                        aiReply = "That's an interesting mathematical approach. Before we jump to the formula, what do you think is the fundamental relationship between those variables? Let's reason through the first step together.";
+                    } else {
+                        aiReply = "Great question. In scientific terms, this relates to conservation laws. If energy in a closed system cannot be created or destroyed, how do you think it applies to the reaction you just described?";
+                    }
+
+                    setMessages(prev => [...prev, { role: 'ai', agent: agent, text: aiReply }]);
+                    setIsTyping(false);
+                }, 1500);
+            };
+
+            return (
+                <div className="flex flex-grow h-[calc(100vh-64px)] overflow-hidden">
+                    {/* Sidebar */}
+                    <div className="w-64 glass hidden md:flex flex-col border-r border-eclipse-border">
+                        <div className="p-4">
+                            <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-white transition-colors text-sm font-bold shadow-lg">
+                                <Icon name="plus" size={16} /> New Conversation
+                            </button>
+                        </div>
+                        <div className="flex-grow overflow-y-auto px-3">
+                            <div className="text-xs font-semibold text-eclipse-muted mb-2 px-2 mt-2">Today</div>
+                            <SidebarItem text="Derivative of e^(2x)" />
+                            <SidebarItem text="Cellular Respiration Setup" />
+                            <div className="text-xs font-semibold text-eclipse-muted mb-2 px-2 mt-6">Previous</div>
+                            <SidebarItem text="AP Calc AB Practice Exam" />
+                            <SidebarItem text="Newton's Third Law" />
+                        </div>
+                    </div>
+
+                    {/* Main Chat Area */}
+                    <div className="flex-grow flex flex-col relative bg-eclipse-surface">
+                        
+                        {/* Header: Agent Switcher */}
+                        <div className="h-16 border-b border-eclipse-border flex items-center justify-between px-6 glass absolute top-0 w-full z-10">
+                            
+                            {/* Sol/Luna Toggle */}
+                            <div className="flex bg-black/60 p-1 rounded-xl border border-white/5 shadow-inner">
+                                <button 
+                                    onClick={() => handleAgentSwitch('luna')} 
+                                    className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${agent === 'luna' ? 'bg-[#8B5CF6] text-white shadow-lg' : 'text-eclipse-muted hover:text-white hover:bg-white/5'}`}
+                                >
+                                    <img src="3.jpg" className="w-5 h-5 rounded-full object-cover border border-white/20" /> 
+                                    Luna <span className="hidden sm:inline font-normal opacity-80">| Math</span>
+                                </button>
+                                <button 
+                                    onClick={() => handleAgentSwitch('sol')} 
+                                    className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${agent === 'sol' ? 'bg-[#EAB308] text-black shadow-lg' : 'text-eclipse-muted hover:text-white hover:bg-white/5'}`}
+                                >
+                                    <img src="4.jpg" className="w-5 h-5 rounded-full object-cover border border-white/20" /> 
+                                    Sol <span className="hidden sm:inline font-normal opacity-80">| Science</span>
+                                </button>
+                            </div>
+
+                            <div className="flex gap-4">
+                                <span className="text-sm font-medium text-eclipse-muted hover:text-white flex items-center gap-2 cursor-pointer transition-colors"><Icon name="message-circle-question" size={16}/> Socratic Mode</span>
+                            </div>
+                        </div>
+
+                        {/* Messages Area */}
+                        <div className="flex-grow overflow-y-auto p-6 pt-24 pb-32">
+                            <div className="max-w-3xl mx-auto space-y-8">
+                                
+                                {messages.map((msg, idx) => {
+                                    if (msg.role === 'system') {
+                                        return (
+                                            <div key={idx} className="flex justify-center">
+                                                <span className="text-xs bg-white/5 text-eclipse-muted px-3 py-1 rounded-full border border-white/10">{msg.text}</span>
+                                            </div>
+                                        );
+                                    }
+
+                                    const isUser = msg.role === 'user';
+                                    const agentImage = msg.agent === 'luna' ? '3.jpg' : '4.jpg';
+                                    const agentName = msg.agent === 'luna' ? 'Luna' : 'Sol';
+
+                                    return (
+                                        <div key={idx} className="flex gap-4">
+                                            {isUser ? (
+                                                <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0 text-white font-bold text-xs">U</div>
+                                            ) : (
+                                                <img src={agentImage} className="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-white/10 shadow-lg" alt={agentName} />
+                                            )}
+                                            
+                                            <div className="flex-grow">
+                                                <p className="font-semibold text-white mb-1">{isUser ? 'You' : agentName}</p>
+                                                <p className="text-eclipse-text leading-relaxed">{msg.text}</p>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+
+                                {isTyping && (
+                                    <div className="flex gap-4 opacity-70">
+                                        <img src={agent === 'luna' ? '3.jpg' : '4.jpg'} className="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-white/10" alt="typing" />
+                                        <div className="flex items-center gap-1">
+                                            <div className="w-2 h-2 bg-eclipse-muted rounded-full animate-bounce"></div>
+                                            <div className="w-2 h-2 bg-eclipse-muted rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                                            <div className="w-2 h-2 bg-eclipse-muted rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></div>
+                                        </div>
+                                    </div>
+                                )}
+                                <div ref={chatEndRef} />
+                            </div>
+                        </div>
+
+                        {/* Input Form */}
+                        <div className="absolute bottom-0 w-full bg-gradient-to-t from-eclipse-surface via-eclipse-surface to-transparent pt-10 pb-6 px-6">
+                            <form onSubmit={handleSubmit} className="max-w-3xl mx-auto relative">
+                                <div className="absolute left-4 top-4 flex gap-2">
+                                    <button type="button" className="text-eclipse-muted hover:text-white transition-colors"><Icon name="paperclip" size={20} /></button>
+                                </div>
+                                <input 
+                                    type="text" 
+                                    value={inputText}
+                                    onChange={(e) => setInputText(e.target.value)}
+                                    placeholder={`Message ${agent === 'luna' ? 'Luna (Math)' : 'Sol (Science)'}...`} 
+                                    className="w-full bg-black/80 border border-white/10 rounded-2xl py-4 pl-14 pr-14 text-white focus:outline-none focus:border-indigo-500 shadow-lg backdrop-blur-md transition-all"
+                                />
+                                <button type="submit" disabled={!inputText.trim()} className="absolute right-3 top-3 w-8 h-8 bg-white disabled:bg-white/20 text-black rounded-xl flex items-center justify-center transition-colors">
+                                    <Icon name="arrow-up" size={18} />
+                                </button>
+                                <p className="text-center text-xs text-eclipse-muted mt-3">Eclipse AI guides you to the answer. Verify complex facts.</p>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function SidebarItem({ text }) {
+            return (
+                <div className="truncate px-3 py-2 text-sm text-eclipse-muted hover:bg-white/5 hover:text-white rounded-lg cursor-pointer transition-colors">
+                    {text}
+                </div>
+            );
+        }
+
+        // --- Other Views (Home, Courses, Progress, Pricing) below remain unchanged structurally, but finalized ---
+
         function HomeView({ setCurrentView }) {
             return (
                 <div className="flex-grow flex flex-col items-center justify-center px-6 pb-20 text-center mt-20">
@@ -170,9 +407,6 @@
                         <FeatureCard icon="brain" title="Socratic Tutoring" desc="AI that teaches by asking the right questions, guiding you to the answer naturally." />
                         <FeatureCard icon="network" title="Concept Mapping" desc="Visualize how algorithms, formulas, and scientific laws connect to one another." />
                         <FeatureCard icon="target" title="Adaptive Practice" desc="Problems dynamically adjust to your skill level, ensuring you are always challenged." />
-                        <FeatureCard icon="microscope" title="Virtual Lab & Graphing" desc="Interactive workspaces for visualizing calculus transformations and physics." />
-                        <FeatureCard icon="layers" title="Knowledge Vault" desc="Everything you learn is automatically synthesized into personal, searchable notes." />
-                        <FeatureCard icon="graduation-cap" title="Exam Prep" desc="Rigorous mock exams and mastery tracking for AP Calculus, Biology, and SATs." />
                     </div>
                 </div>
             );
@@ -190,196 +424,26 @@
             );
         }
 
-        // --- Chat Interface (ChatGPT Style) ---
-        function ChatView() {
-            return (
-                <div className="flex flex-grow h-[calc(100vh-64px)] overflow-hidden">
-                    {/* Sidebar */}
-                    <div className="w-64 glass hidden md:flex flex-col border-r border-eclipse-border">
-                        <div className="p-4">
-                            <button className="w-full flex items-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-colors text-sm font-medium">
-                                <Icon name="plus" size={16} /> New Chat
-                            </button>
-                        </div>
-                        <div className="flex-grow overflow-y-auto px-3">
-                            <div className="text-xs font-semibold text-eclipse-muted mb-2 px-2 mt-4">Today</div>
-                            <SidebarItem text="Derivative of e^(2x)" />
-                            <SidebarItem text="Cellular Respiration Setup" />
-                            <div className="text-xs font-semibold text-eclipse-muted mb-2 px-2 mt-6">Previous 7 Days</div>
-                            <SidebarItem text="AP Calc AB Practice Exam" />
-                            <SidebarItem text="Newton's Third Law" />
-                            <SidebarItem text="Socratic Mode: Limits" />
-                        </div>
-                        <div className="p-4 border-t border-eclipse-border">
-                            <div className="flex items-center gap-3 px-2">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500"></div>
-                                <div className="text-sm font-medium">Student Profile</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Main Chat Area */}
-                    <div className="flex-grow flex flex-col relative bg-eclipse-surface">
-                        {/* Header options */}
-                        <div className="h-14 border-b border-eclipse-border flex items-center justify-between px-6 glass absolute top-0 w-full z-10">
-                            <div className="flex gap-4">
-                                <span className="text-sm font-medium text-white flex items-center gap-2 cursor-pointer"><Icon name="cpu" size={16} className="text-indigo-400"/> Teacher Mode</span>
-                                <span className="text-sm font-medium text-eclipse-muted hover:text-white flex items-center gap-2 cursor-pointer"><Icon name="message-circle-question" size={16}/> Socratic</span>
-                            </div>
-                            <div className="flex gap-4">
-                                <Icon name="settings" size={18} className="text-eclipse-muted cursor-pointer hover:text-white" />
-                            </div>
-                        </div>
-
-                        {/* Messages */}
-                        <div className="flex-grow overflow-y-auto p-6 pt-24 pb-32">
-                            <div className="max-w-3xl mx-auto space-y-8">
-                                {/* AI Welcome Message */}
-                                <div className="flex gap-4">
-                                    <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
-                                        <div className="w-4 h-4 rounded-full bg-eclipse-bg"></div>
-                                    </div>
-                                    <div className="flex-grow">
-                                        <p className="font-semibold text-white mb-1">Eclipse AI</p>
-                                        <p className="text-eclipse-muted leading-relaxed">
-                                            Welcome to your personalized learning workspace. I can act as your tutor, analyze uploaded homework, or guide you through complex problem-solving. 
-                                            <br/><br/>What would you like to explore today?
-                                        </p>
-                                        <div className="flex gap-2 mt-4 flex-wrap">
-                                            <SuggestionBadge text="Explain Quantum Entanglement" />
-                                            <SuggestionBadge text="Help me with AP Calculus" />
-                                            <SuggestionBadge text="Generate Biology Flashcards" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* User Message */}
-                                <div className="flex gap-4">
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex-shrink-0"></div>
-                                    <div className="flex-grow">
-                                        <p className="font-semibold text-white mb-1">You</p>
-                                        <p className="text-eclipse-text leading-relaxed">
-                                            I'm struggling with the chain rule in calculus. Can you explain it conceptually without just giving me the formula?
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* AI Response */}
-                                <div className="flex gap-4">
-                                    <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
-                                        <div className="w-4 h-4 rounded-full bg-eclipse-bg"></div>
-                                    </div>
-                                    <div className="flex-grow">
-                                        <p className="font-semibold text-white mb-1">Eclipse AI</p>
-                                        <p className="text-eclipse-muted leading-relaxed mb-4">
-                                            Absolutely. Let's think about the chain rule conceptually before looking at the math.
-                                        </p>
-                                        <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-4 text-sm font-mono text-indigo-300">
-                                            Imagine a set of gears. Gear A turns Gear B, and Gear B turns Gear C.<br/><br/>
-                                            If you want to know how fast Gear C turns relative to Gear A, you have to multiply the rates: (Rate of B relative to A) × (Rate of C relative to B).
-                                        </div>
-                                        <p className="text-eclipse-muted leading-relaxed">
-                                            In calculus, the "gears" are nested functions, like <code>f(g(x))</code>. To find the overall rate of change (the derivative), we multiply the rate of change of the outside function by the rate of change of the inside function.
-                                            <br/><br/>Does that analogy make sense, or should we look at a specific example like a car driving up a mountain?
-                                        </p>
-                                        <div className="flex gap-3 mt-4 text-eclipse-muted">
-                                            <Icon name="copy" size={16} className="cursor-pointer hover:text-white" />
-                                            <Icon name="thumbs-up" size={16} className="cursor-pointer hover:text-white" />
-                                            <Icon name="thumbs-down" size={16} className="cursor-pointer hover:text-white" />
-                                            <span className="text-xs ml-auto cursor-pointer hover:text-white flex items-center gap-1"><Icon name="bookmark" size={14}/> Save to Vault</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Input Area */}
-                        <div className="absolute bottom-0 w-full bg-gradient-to-t from-eclipse-surface via-eclipse-surface to-transparent pt-10 pb-6 px-6">
-                            <div className="max-w-3xl mx-auto relative">
-                                <div className="absolute left-4 top-4 flex gap-2">
-                                    <button className="text-eclipse-muted hover:text-white transition-colors" title="Upload Document"><Icon name="paperclip" size={20} /></button>
-                                    <button className="text-eclipse-muted hover:text-white transition-colors" title="Open Whiteboard"><Icon name="pen-tool" size={20} /></button>
-                                </div>
-                                <input 
-                                    type="text" 
-                                    placeholder="Message Eclipse AI... (Type / for commands)" 
-                                    className="w-full bg-eclipse-bg border border-eclipse-border rounded-2xl py-4 pl-20 pr-14 text-white focus:outline-none focus:border-indigo-500/50 shadow-lg"
-                                />
-                                <button className="absolute right-3 top-3 w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center text-white hover:bg-indigo-500 transition-colors">
-                                    <Icon name="arrow-up" size={18} />
-                                </button>
-                                <p className="text-center text-xs text-eclipse-muted mt-3">Eclipse AI can make mistakes. Verify important scientific and mathematical facts.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        function SidebarItem({ text }) {
-            return (
-                <div className="truncate px-3 py-2 text-sm text-eclipse-muted hover:bg-white/5 hover:text-white rounded-lg cursor-pointer transition-colors">
-                    {text}
-                </div>
-            );
-        }
-
-        function SuggestionBadge({ text }) {
-            return (
-                <div className="text-xs px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 cursor-pointer transition-colors text-eclipse-muted hover:text-white">
-                    {text}
-                </div>
-            );
-        }
-
-        // --- Courses View ---
         function CoursesView() {
             const courses = [
                 { title: "AP Calculus BC", desc: "Master integrals, series, and advanced derivatives.", progress: 65, difficulty: "Advanced", lessons: 84 },
                 { title: "AP Biology", desc: "Cellular structure, genetics, and ecology.", progress: 32, difficulty: "Advanced", lessons: 120 },
-                { title: "Precalculus", desc: "Trigonometry, vectors, and complex numbers.", progress: 100, difficulty: "Intermediate", lessons: 60 },
-                { title: "Data Science Foundations", desc: "Probability, distributions, and Python basics.", progress: 10, difficulty: "Intermediate", lessons: 45 },
-                { title: "Physics: Mechanics", desc: "Kinematics, Newton's laws, and energy.", progress: 0, difficulty: "Hard", lessons: 55 },
-                { title: "AMC 12 Prep", desc: "Competition math, number theory, game theory.", progress: 0, difficulty: "Expert", lessons: 40 }
+                { title: "Precalculus", desc: "Trigonometry, vectors, and complex numbers.", progress: 100, difficulty: "Intermediate", lessons: 60 }
             ];
 
             return (
                 <div className="max-w-6xl mx-auto w-full p-6 pt-10">
-                    <div className="flex justify-between items-end mb-8">
-                        <div>
-                            <h2 className="text-3xl font-bold mb-2">Learning Paths</h2>
-                            <p className="text-eclipse-muted">Structured curricula tailored to your goals.</p>
-                        </div>
-                        <div className="flex gap-2">
-                            <button className="px-4 py-2 text-sm glass rounded-lg text-white"><Icon name="filter" size={16} className="inline mr-2"/>Filter</button>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <h2 className="text-3xl font-bold mb-2">Learning Paths</h2>
+                    <p className="text-eclipse-muted mb-8">Structured curricula tailored to your goals.</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {courses.map((course, i) => (
-                            <div key={i} className="glass rounded-2xl p-6 flex flex-col border border-white/5 hover:border-indigo-500/30 transition-all hover:-translate-y-1">
+                            <div key={i} className="glass rounded-2xl p-6 flex flex-col border border-white/5 hover:border-indigo-500/30">
                                 <div className="flex justify-between items-start mb-4">
-                                    <div className={`text-xs font-semibold px-2 py-1 rounded ${course.progress === 100 ? 'bg-green-500/20 text-green-400' : 'bg-indigo-500/20 text-indigo-400'}`}>
-                                        {course.difficulty}
-                                    </div>
-                                    <Icon name="bookmark" size={18} className="text-eclipse-muted cursor-pointer hover:text-white" />
+                                    <div className="text-xs font-semibold px-2 py-1 rounded bg-indigo-500/20 text-indigo-400">{course.difficulty}</div>
                                 </div>
                                 <h3 className="text-xl font-bold mb-2">{course.title}</h3>
                                 <p className="text-sm text-eclipse-muted mb-6 flex-grow">{course.desc}</p>
-                                
-                                <div className="mb-4">
-                                    <div className="flex justify-between text-xs text-eclipse-muted mb-1">
-                                        <span>{course.progress}% Completed</span>
-                                        <span>{course.lessons} Lessons</span>
-                                    </div>
-                                    <div className="w-full bg-eclipse-bg rounded-full h-1.5">
-                                        <div className={`h-1.5 rounded-full ${course.progress === 100 ? 'bg-green-500' : 'bg-indigo-500'}`} style={{ width: `${course.progress}%` }}></div>
-                                    </div>
-                                </div>
-                                
-                                <button className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-colors ${course.progress === 100 ? 'bg-white/5 text-white hover:bg-white/10' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>
-                                    {course.progress === 0 ? 'Start Course' : course.progress === 100 ? 'Review' : 'Continue Learning'}
-                                </button>
+                                <button className="w-full py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700">Continue Learning</button>
                             </div>
                         ))}
                     </div>
@@ -387,88 +451,17 @@
             );
         }
 
-        // --- Progress Dashboard ---
         function ProgressView() {
             return (
                 <div className="max-w-6xl mx-auto w-full p-6 pt-10">
-                    <h2 className="text-3xl font-bold mb-8">Progress & Analytics</h2>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                        <StatCard title="Current Streak" value="14 Days" icon="flame" color="text-orange-400" bg="bg-orange-400/10" />
-                        <StatCard title="Total XP" value="12,450" icon="star" color="text-yellow-400" bg="bg-yellow-400/10" />
-                        <StatCard title="Questions Answered" value="842" icon="check-circle" color="text-green-400" bg="bg-green-400/10" />
-                        <StatCard title="Hours Studied" value="48.5" icon="clock" color="text-blue-400" bg="bg-blue-400/10" />
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="lg:col-span-2 glass rounded-2xl p-6 border border-white/5">
-                            <h3 className="text-lg font-semibold mb-4">Mastery Breakdown</h3>
-                            <div className="space-y-6">
-                                <SkillBar skill="Differential Calculus" percentage={85} />
-                                <SkillBar skill="Integral Calculus" percentage={45} />
-                                <SkillBar skill="Cellular Biology" percentage={70} />
-                                <SkillBar skill="Scientific Reasoning" percentage={92} />
-                            </div>
-                        </div>
-                        
-                        <div className="glass rounded-2xl p-6 border border-white/5 flex flex-col">
-                            <h3 className="text-lg font-semibold mb-4">Recent Achievements</h3>
-                            <div className="flex-grow space-y-4">
-                                <Achievement icon="zap" title="Speed Thinker" desc="Answered 10 practice problems perfectly under 5 minutes." date="Today" />
-                                <Achievement icon="award" title="Calculus Initiate" desc="Completed the Limits unit." date="Yesterday" />
-                                <Achievement icon="microscope" title="Lab Tech" desc="Ran 5 virtual biology simulations." date="3 days ago" />
-                            </div>
-                            <button className="w-full mt-4 py-2 border border-white/10 rounded-xl text-sm hover:bg-white/5 transition-colors">View All Badges</button>
-                        </div>
+                    <h2 className="text-3xl font-bold mb-8">Progress Dashboard</h2>
+                    <div className="glass rounded-2xl p-8 border border-white/5 text-center text-eclipse-muted">
+                        Progress tracking will populate as you complete courses and solve problems with Sol and Luna.
                     </div>
                 </div>
             );
         }
 
-        function StatCard({ title, value, icon, color, bg }) {
-            return (
-                <div className="glass rounded-2xl p-6 border border-white/5 flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${bg} ${color}`}>
-                        <Icon name={icon} size={24} />
-                    </div>
-                    <div>
-                        <p className="text-sm text-eclipse-muted">{title}</p>
-                        <p className="text-2xl font-bold text-white">{value}</p>
-                    </div>
-                </div>
-            );
-        }
-
-        function SkillBar({ skill, percentage }) {
-            return (
-                <div>
-                    <div className="flex justify-between text-sm mb-1">
-                        <span className="font-medium">{skill}</span>
-                        <span className="text-eclipse-muted">{percentage}% Mastery</span>
-                    </div>
-                    <div className="w-full bg-eclipse-bg rounded-full h-2">
-                        <div className="bg-indigo-500 h-2 rounded-full" style={{ width: `${percentage}%` }}></div>
-                    </div>
-                </div>
-            );
-        }
-
-        function Achievement({ icon, title, desc, date }) {
-            return (
-                <div className="flex gap-3 items-start">
-                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 text-yellow-400 mt-1">
-                        <Icon name={icon} size={14} />
-                    </div>
-                    <div>
-                        <h4 className="text-sm font-semibold">{title}</h4>
-                        <p className="text-xs text-eclipse-muted leading-tight">{desc}</p>
-                        <p className="text-[10px] text-eclipse-muted/50 mt-1">{date}</p>
-                    </div>
-                </div>
-            );
-        }
-
-        // --- Pricing View ---
         function PricingView() {
             return (
                 <div className="max-w-4xl mx-auto w-full p-6 pt-10 text-center pb-20">
@@ -481,12 +474,9 @@
                             <h3 className="text-2xl font-bold mb-2">Basic</h3>
                             <p className="text-eclipse-muted text-sm mb-6">For casual learners.</p>
                             <div className="text-4xl font-bold mb-6">$0<span className="text-lg font-normal text-eclipse-muted">/mo</span></div>
-                            
-                            <ul className="space-y-4 mb-8 flex-grow">
-                                <PricingFeature text="Limited daily AI chats" />
-                                <PricingFeature text="Basic interactive courses" />
-                                <PricingFeature text="Standard practice problems" />
-                                <PricingFeature text="Community support" />
+                            <ul className="space-y-4 mb-8 flex-grow text-sm">
+                                <li className="flex items-center gap-3"><Icon name="check" size={16} className="text-green-400" /> Limited daily AI chats</li>
+                                <li className="flex items-center gap-3"><Icon name="check" size={16} className="text-green-400" /> Basic interactive courses</li>
                             </ul>
                             <button className="w-full py-3 rounded-xl border border-white/10 text-white font-semibold hover:bg-white/5 transition-colors">Current Plan</button>
                         </div>
@@ -497,31 +487,19 @@
                             <h3 className="text-2xl font-bold mb-2 text-indigo-400">Pro</h3>
                             <p className="text-eclipse-muted text-sm mb-6">For dedicated students & exam prep.</p>
                             <div className="text-4xl font-bold mb-6">$19<span className="text-lg font-normal text-eclipse-muted">/mo</span></div>
-                            
-                            <ul className="space-y-4 mb-8 flex-grow">
-                                <PricingFeature text="Unlimited AI Tutor chats" />
-                                <PricingFeature text="Full AP & College course access" />
-                                <PricingFeature text="Advanced Mistake Analysis Engine" />
-                                <PricingFeature text="Unlimited Practice & Mock Exams" />
-                                <PricingFeature text="Priority AI reasoning speed" />
+                            <ul className="space-y-4 mb-8 flex-grow text-sm">
+                                <li className="flex items-center gap-3"><Icon name="check" size={16} className="text-indigo-400" /> Unlimited AI chats & API access</li>
+                                <li className="flex items-center gap-3"><Icon name="check" size={16} className="text-indigo-400" /> Full course & mastery access</li>
+                                <li className="flex items-center gap-3"><Icon name="check" size={16} className="text-indigo-400" /> Advanced analytics & study plans</li>
                             </ul>
-                            <button className="w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition-colors shadow-[0_0_15px_rgba(99,102,241,0.4)]">Upgrade to Pro</button>
+                            <button className="w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-500 transition-colors shadow-[0_0_15px_rgba(99,102,241,0.4)]">Upgrade to Pro</button>
                         </div>
                     </div>
                 </div>
             );
         }
 
-        function PricingFeature({ text }) {
-            return (
-                <li className="flex items-start gap-3 text-sm">
-                    <Icon name="check" size={18} className="text-indigo-400 flex-shrink-0" />
-                    <span>{text}</span>
-                </li>
-            );
-        }
-
-        // Render App
+        // Render Application
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
